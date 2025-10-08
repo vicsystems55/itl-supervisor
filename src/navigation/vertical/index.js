@@ -85,8 +85,8 @@ setTimeout(() => {
         icon: { icon: 'tabler-report-analytics' },
         children: [
           { title: 'Project Reports', to: { name: 'project-reports' } },
-          { title: 'Annex Forms', to: { path: '/' } },
-          { title: 'OAS Upload / Export', to: { path: '/' } },
+          { title: 'Annex Forms', to: { name: 'annex-forms' } },
+          { title: 'OAS Upload / Export', to: { name: 'oas-upload' } },
         ],
       },
 
@@ -95,9 +95,9 @@ setTimeout(() => {
         title: 'System Settings',
         icon: { icon: 'tabler-settings' },
         children: [
-          { title: 'User Accounts', to: { path: '/' } },
-          { title: 'Notifications', to: { path: '/' } },
-          { title: 'Configuration', to: { path: '/' } },
+          { title: 'User Accounts', to: { name: 'accounts' } },
+          { title: 'Notifications', to: { name: 'notifications' } },
+          // { title: 'Configuration', to: { path: '/' } },
         ],
       },
     ]
