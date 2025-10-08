@@ -54,7 +54,6 @@ declare module 'vue-router/auto-routes' {
     'security-login': RouteRecordInfo<'security-login', '/security-login', Record<never, never>, Record<never, never>>,
     'technicians': RouteRecordInfo<'technicians', '/technicians', Record<never, never>, Record<never, never>>,
     'technicians-id': RouteRecordInfo<'technicians-id', '/technicians/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    'technicians-overview': RouteRecordInfo<'technicians-overview', '/TechniciansOverview', Record<never, never>, Record<never, never>>,
     'tracking-map': RouteRecordInfo<'tracking-map', '/TrackingMap', Record<never, never>, Record<never, never>>,
     'upgrade-plan': RouteRecordInfo<'upgrade-plan', '/upgrade-plan', Record<never, never>, Record<never, never>>,
     'vehicles-drivers': RouteRecordInfo<'vehicles-drivers', '/VehiclesDrivers', Record<never, never>, Record<never, never>>,
