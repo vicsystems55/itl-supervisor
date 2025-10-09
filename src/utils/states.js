@@ -1,0 +1,46 @@
+// This can be populated from your API or kept as static data
+export const states = [
+  { title: 'Abia', value: 1 },
+  { title: 'Adamawa', value: 2 },
+  { title: 'Akwa Ibom', value: 3 },
+  { title: 'Anambra', value: 4 },
+  { title: 'Bauchi', value: 5 },
+  { title: 'Bayelsa', value: 6 },
+  { title: 'Benue', value: 7 },
+  { title: 'Borno', value: 8 },
+  { title: 'Cross River', value: 9 },
+  { title: 'Delta', value: 10 },
+  { title: 'Ebonyi', value: 11 },
+  { title: 'Edo', value: 12 },
+  { title: 'Ekiti', value: 13 },
+  { title: 'Enugu', value: 14 },
+  { title: 'Gombe', value: 15 },
+  { title: 'Imo', value: 16 },
+  { title: 'Jigawa', value: 17 },
+  { title: 'Kaduna', value: 18 },
+  { title: 'Kano', value: 19 },
+  { title: 'Katsina', value: 20 },
+  { title: 'Kebbi', value: 21 },
+  { title: 'Kogi', value: 22 },
+  { title: 'Kwara', value: 23 },
+  { title: 'Lagos', value: 24 },
+  { title: 'Nasarawa', value: 25 },
+  { title: 'Niger', value: 26 },
+  { title: 'Ogun', value: 27 },
+  { title: 'Ondo', value: 28 },
+  { title: 'Osun', value: 29 },
+  { title: 'Oyo', value: 30 },
+  { title: 'Plateau', value: 31 },
+  { title: 'Rivers', value: 32 },
+  { title: 'Sokoto', value: 33 },
+  { title: 'Taraba', value: 34 },
+  { title: 'Yobe', value: 35 },
+  { title: 'Zamfara', value: 36 },
+  { title: 'FCT', value: 37 }
+]
+
+export const verificationOptions = [
+  { title: 'All', value: null },
+  { title: 'Verified', value: true },
+  { title: 'Pending', value: false }
+]

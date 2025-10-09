@@ -97,7 +97,9 @@ setTimeout(() => {
         children: [
           { title: 'User Accounts', to: { name: 'accounts' } },
           { title: 'Notifications', to: { name: 'notifications' } },
-          // { title: 'Configuration', to: { path: '/' } },
+          { title: 'Authorization', to: { name: 'authorization' } },
+          { title: 'Database', to: { name: 'upload-database' } },
+
         ],
       },
     ]

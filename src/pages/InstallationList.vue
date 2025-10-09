@@ -1,301 +1,550 @@
 <template>
-  <div class="installation-page page-container">
-    <!-- Header Summary Cards -->
-    <v-card class="pa-4 mb-6">
-      <h2 class="mb-4">Reporting on Implementation Schedule (Annex G)</h2>
-
-      <v-row>
-        <v-col
-          v-for="card in summaryCards"
-          :key="card.label"
-          cols="12"
-          sm="6"
-          md="3"
-        >
-          <v-card class="pa-4 stat-card" :color="card.color" dark>
-            <div class="text-h5 font-weight-bold">{{ card.value }}</div>
-            <div class="text-subtitle-1">{{ card.label }}</div>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-card>
-
-    <!-- Filter Controls -->
-    <v-card>
-      <v-card-title>
-        <div class="title-row">
-          <h3>Installation List</h3>
-          <div class="controls">
-            <v-text-field
-              v-model="search"
-              placeholder="Search supplier, country, or product"
-              dense
-              hide-details
-              clearable
-              append-icon="mdi-magnify"
-            />
-            <v-btn color="primary" @click="exportCsv" small>
-              <v-icon start>mdi-download</v-icon>Export CSV
-            </v-btn>
+  <VContainer fluid class="pa-6">
+    <!-- Header Section -->
+    <VRow class="mb-6">
+      <VCol cols="12">
+        <div class="d-flex justify-space-between align-center">
+          <div>
+            <h1 class="text-h4 font-weight-bold text-primary">Installations</h1>
+            <p class="text-body-1 text-medium-emphasis">Manage and monitor equipment installations</p>
           </div>
-        </div>
-      </v-card-title>
-
-      <!-- Data Table -->
-      <v-data-table
-        :headers="headers"
-        :items="filteredInstallations"
-        :items-per-page="itemsPerPage"
-        v-model:page="page"
-        class="elevation-1 clickable-table"
-        @click:row="goToDetails"
-      >
-        <!-- Custom cells -->
-        <template #item.plannedEnd="{ item }">
-          {{ formatDate(item.plannedEnd) }}
-        </template>
-
-        <template #item.actualEnd="{ item }">
-          {{ formatDate(item.actualEnd) }}
-        </template>
-
-        <template #item.deviations="{ item }">
-          <v-chip
-            :color="item.deviations > 0 ? 'error' : 'success'"
-            small
+          <VBtn
+            color="primary"
+            prepend-icon="tabler-plus"
+            @click="exportData"
           >
-            {{ item.deviations }}
-          </v-chip>
-        </template>
+            Export Data
+          </VBtn>
+        </div>
+      </VCol>
+    </VRow>
 
-        <!-- No data -->
-        <template #no-data>
-          <v-card-text>No installation records found.</v-card-text>
-        </template>
-      </v-data-table>
+    <!-- Statistics Cards -->
+    <VRow class="mb-6">
+      <VCol cols="12" sm="6" md="3">
+        <VCard class="stat-card">
+          <VCardText class="d-flex align-center">
+            <VAvatar
+              color="primary"
+              variant="tonal"
+              class="me-4"
+            >
+              <VIcon icon="tabler-package" />
+            </VAvatar>
+            <div>
+              <div class="text-h6 font-weight-semibold">{{ statistics.total_installations || 0 }}</div>
+              <div class="text-caption text-medium-emphasis">Total Installations</div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
 
-      <!-- Pagination -->
-      <v-card-actions>
-        <v-pagination v-model="page" :length="pageCount" />
-        <div class="spacer" />
-        <v-select
-          v-model="itemsPerPage"
-          :items="[5, 10, 25, 50]"
-          dense
-          hide-details
-          class="perpage-select"
-        />
-      </v-card-actions>
-    </v-card>
-  </div>
+      <VCol cols="12" sm="6" md="3">
+        <VCard class="stat-card">
+          <VCardText class="d-flex align-center">
+            <VAvatar
+              color="success"
+              variant="tonal"
+              class="me-4"
+            >
+              <VIcon icon="tabler-check" />
+            </VAvatar>
+            <div>
+              <div class="text-h6 font-weight-semibold">{{ statistics.verified_installations || 0 }}</div>
+              <div class="text-caption text-medium-emphasis">Verified</div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <VCol cols="12" sm="6" md="3">
+        <VCard class="stat-card">
+          <VCardText class="d-flex align-center">
+            <VAvatar
+              color="warning"
+              variant="tonal"
+              class="me-4"
+            >
+              <VIcon icon="tabler-clock" />
+            </VAvatar>
+            <div>
+              <div class="text-h6 font-weight-semibold">{{ statistics.pending_verification || 0 }}</div>
+              <div class="text-caption text-medium-emphasis">Pending Verification</div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <VCol cols="12" sm="6" md="3">
+        <VCard class="stat-card">
+          <VCardText class="d-flex align-center">
+            <VAvatar
+              color="info"
+              variant="tonal"
+              class="me-4"
+            >
+              <VIcon icon="tabler-calendar" />
+            </VAvatar>
+            <div>
+              <div class="text-h6 font-weight-semibold">{{ statistics.installations_this_month || 0 }}</div>
+              <div class="text-caption text-medium-emphasis">This Month</div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
+
+    <!-- Filters Section -->
+    <VCard class="mb-6">
+      <VCardText>
+        <VRow>
+          <VCol cols="12" sm="6" md="3">
+            <AppTextField
+              v-model="filters.search"
+              label="Search"
+              placeholder="Search installations..."
+              prepend-inner-icon="tabler-search"
+              clearable
+              @click:clear="clearSearch"
+            />
+          </VCol>
+
+          <VCol cols="12" sm="6" md="3">
+            <AppSelect
+              v-model="filters.state_id"
+              :items="states"
+              label="State"
+              placeholder="Select State"
+              clearable
+            />
+          </VCol>
+
+          <VCol cols="12" sm="6" md="3">
+            <AppSelect
+              v-model="filters.verified"
+              :items="verificationOptions"
+              label="Verification Status"
+              clearable
+            />
+          </VCol>
+
+          <VCol cols="12" sm="6" md="3">
+            <AppSelect
+              v-model="filters.per_page"
+              :items="[10, 25, 50, 100]"
+              label="Items per page"
+            />
+          </VCol>
+        </VRow>
+
+        <VRow class="mt-2">
+          <VCol cols="12" class="d-flex gap-4">
+            <VBtn
+              color="primary"
+              @click="fetchInstallations"
+              :loading="loading"
+            >
+              <VIcon icon="tabler-filter" class="me-2" />
+              Apply Filters
+            </VBtn>
+
+            <VBtn
+              variant="tonal"
+              @click="clearFilters"
+            >
+              <VIcon icon="tabler-rotate-2" class="me-2" />
+              Clear Filters
+            </VBtn>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+
+    <!-- Installations Table -->
+    <VCard>
+      <VCardText>
+        <VTable class="installation-table">
+          <thead>
+            <tr>
+              <th class="text-left">Facility</th>
+              <th class="text-left">State</th>
+              <th class="text-left">LGA</th>
+              <th class="text-left">Supplier</th>
+              <th class="text-left">Model</th>
+              <th class="text-left">Health Officer</th>
+              <th class="text-left">Status</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="8" class="text-center py-8">
+                <VProgressCircular
+                  indeterminate
+                  color="primary"
+                />
+                <div class="text-body-2 mt-2">Loading installations...</div>
+              </td>
+            </tr>
+
+            <tr v-else-if="installations.data.length === 0">
+              <td colspan="8" class="text-center py-8">
+                <VIcon icon="tabler-package-off" size="48" class="text-medium-emphasis mb-2" />
+                <div class="text-body-1 text-medium-emphasis">No installations found</div>
+              </td>
+            </tr>
+
+            <tr
+              v-else
+              v-for="installation in installations.data"
+              :key="installation.id"
+              class="installation-row"
+            >
+              <td>
+                <div class="d-flex align-center">
+                  <VAvatar
+                    size="36"
+                    color="primary"
+                    variant="tonal"
+                    class="me-3"
+                  >
+                    <VIcon icon="tabler-building" />
+                  </VAvatar>
+                  <div>
+                    <div class="font-weight-medium">{{ installation.facility?.name }}</div>
+                    <div class="text-caption text-medium-emphasis">
+                      {{ installation.facility?.address }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <VChip
+                  v-if="installation.facility?.state"
+                  variant="tonal"
+                  color="primary"
+                  size="small"
+                >
+                  {{ installation.facility.state.name }}
+                </VChip>
+              </td>
+              <td>
+                <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-center">
+                  <VIcon icon="tabler-truck" class="me-2 text-success" size="18" />
+                  <span class="font-weight-medium">{{ installation.supplier }}</span>
+                </div>
+              </td>
+              <td>
+                <VChip
+                  variant="outlined"
+                  size="small"
+                >
+                  {{ installation.product_model }}
+                </VChip>
+              </td>
+              <td>
+                <div v-if="installation.health_officer" class="d-flex align-center">
+                  <VAvatar
+                    size="28"
+                    color="secondary"
+                    variant="tonal"
+                    class="me-2"
+                  >
+                    <VIcon icon="tabler-user" size="16" />
+                  </VAvatar>
+                  <span class="text-body-2">{{ installation.health_officer.name }}</span>
+                </div>
+                <span v-else class="text-caption text-medium-emphasis">Not assigned</span>
+              </td>
+              <td>
+                <VChip
+                  :color="installation.verified_by_health_officer ? 'success' : 'warning'"
+                  variant="flat"
+                  size="small"
+                >
+                  <VIcon
+                    :icon="installation.verified_by_health_officer ? 'tabler-check' : 'tabler-clock'"
+                    class="me-1"
+                    size="16"
+                  />
+                  {{ installation.verified_by_health_officer ? 'Verified' : 'Pending' }}
+                </VChip>
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  <VBtn
+                    icon
+                    variant="text"
+                    size="small"
+                    color="primary"
+                    @click="viewInstallation(installation)"
+                  >
+                    <VIcon icon="tabler-eye" size="20" />
+                    <VTooltip activator="parent" location="top">View Details</VTooltip>
+                  </VBtn>
+
+                  <VBtn
+                    icon
+                    variant="text"
+                    size="small"
+                    :color="installation.verified_by_health_officer ? 'warning' : 'success'"
+                    @click="toggleVerification(installation)"
+                  >
+                    <VIcon
+                      :icon="installation.verified_by_health_officer ? 'tabler-x' : 'tabler-check'"
+                      size="20"
+                    />
+                    <VTooltip activator="parent" location="top">
+                      {{ installation.verified_by_health_officer ? 'Unverify' : 'Verify' }}
+                    </VTooltip>
+                  </VBtn>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </VTable>
+
+        <!-- Pagination -->
+        <VRow v-if="installations.data.length > 0" class="mt-4">
+          <VCol cols="12" class="d-flex justify-center">
+            <VPagination
+              v-model="filters.page"
+              :length="installations.last_page"
+              :total-visible="7"
+              @update:model-value="fetchInstallations"
+            />
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+
+    <!-- Installation Details Dialog -->
+    <VDialog
+      v-model="showDetailsDialog"
+      max-width="600"
+    >
+      <VCard v-if="selectedInstallation">
+        <VCardTitle class="d-flex justify-space-between align-center">
+          <span>Installation Details</span>
+          <VBtn
+            icon
+            variant="text"
+            @click="showDetailsDialog = false"
+          >
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+
+        <VCardText>
+          <VRow>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Facility</label>
+                <div class="text-body-1 font-weight-medium">
+                  {{ selectedInstallation.facility?.name }}
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">State/LGA</label>
+                <div class="text-body-1">
+                  {{ selectedInstallation.facility?.state?.name }} / {{ selectedInstallation.facility?.lga?.name }}
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Supplier</label>
+                <div class="text-body-1">{{ selectedInstallation.supplier }}</div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Product Model</label>
+                <div class="text-body-1">{{ selectedInstallation.product_model }}</div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Health Officer</label>
+                <div class="text-body-1">
+                  {{ selectedInstallation.health_officer?.name || 'Not assigned' }}
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Verification Status</label>
+                <div>
+                  <VChip
+                    :color="selectedInstallation.verified_by_health_officer ? 'success' : 'warning'"
+                    size="small"
+                  >
+                    {{ selectedInstallation.verified_by_health_officer ? 'Verified' : 'Pending' }}
+                  </VChip>
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" v-if="selectedInstallation.remarks">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis">Remarks</label>
+                <div class="text-body-1">{{ selectedInstallation.remarks }}</div>
+              </div>
+            </VCol>
+          </VRow>
+        </VCardText>
+      </VCard>
+    </VDialog>
+  </VContainer>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, watch } from 'vue'
+import installationService from '@/services/installationService'
+import { states, verificationOptions } from '@/util/states'
 
-const router = useRouter();
+// Reactive data
+const loading = ref(false)
+const installations = ref({ data: [] })
+const statistics = ref({})
+const showDetailsDialog = ref(false)
+const selectedInstallation = ref(null)
 
-// --- State ---
-const search = ref("");
-const page = ref(1);
-const itemsPerPage = ref(10);
+// Filters
+const filters = ref({
+  search: '',
+  state_id: null,
+  verified: null,
+  page: 1,
+  per_page: 10
+})
 
-// --- Table headers (Annex G structure) ---
-const headers = [
-  { title: "Country", key: "country" },
-  { title: "Province", key: "province" },
-  { title: "Supplier", key: "supplier" },
-  { title: "PO Number", key: "poNumber" },
-  { title: "PO Item Number", key: "poItem" },
-  { title: "Service Contract Number", key: "contract" },
-  { title: "Product Model", key: "product" },
-  { title: "Quantity Received (After Customs)", key: "qtyReceived" },
-  { title: "Date Received (After Customs)", key: "dateReceived" },
-  { title: "Delivered to Facilities", key: "qtyDelivered" },
-  { title: "Installed at Facilities", key: "qtyInstalled" },
-  { title: "Planned Installation End", key: "plannedEnd" },
-  { title: "Actual Installation End", key: "actualEnd" },
-  { title: "Deviations", key: "deviations" },
-  { title: "Supplier Comments", key: "comments" },
-];
+// Watch for filter changes and debounce search
+let searchTimeout
+watch(() => filters.value.search, (newSearch) => {
+  clearTimeout(searchTimeout)
+  if (newSearch !== null) {
+    searchTimeout = setTimeout(() => {
+      filters.value.page = 1
+      fetchInstallations()
+    }, 500)
+  }
+})
 
-// --- Sample Data ---
-const installations = ref([
-  {
-    id: 1,
-    country: "Nigeria",
-    province: "Lagos",
-    supplier: "Techlogix Ltd",
-    poNumber: "PO-1001",
-    poItem: "A-45",
-    contract: "SCN-2203",
-    product: "Solar Inverter 10kW",
-    qtyReceived: 50,
-    dateReceived: "2025-07-12",
-    qtyDelivered: 48,
-    qtyInstalled: 45,
-    plannedEnd: "2025-08-20",
-    actualEnd: "2025-08-25",
-    deviations: 2,
-    comments: "Delay due to customs clearance.",
-  },
-  {
-    id: 2,
-    country: "Nigeria",
-    province: "Abuja",
-    supplier: "EnergyPro Systems",
-    poNumber: "PO-1002",
-    poItem: "B-32",
-    contract: "SCN-2204",
-    product: "Battery Bank 5kWh",
-    qtyReceived: 100,
-    dateReceived: "2025-06-15",
-    qtyDelivered: 100,
-    qtyInstalled: 100,
-    plannedEnd: "2025-07-10",
-    actualEnd: "2025-07-09",
-    deviations: 0,
-    comments: "Completed ahead of schedule.",
-  },
-  {
-    id: 3,
-    country: "Ghana",
-    province: "Accra",
-    supplier: "SolarWorks Africa",
-    poNumber: "PO-1003",
-    poItem: "C-10",
-    contract: "SCN-2205",
-    product: "Solar Panels 500W",
-    qtyReceived: 200,
-    dateReceived: "2025-05-10",
-    qtyDelivered: 200,
-    qtyInstalled: 180,
-    plannedEnd: "2025-06-30",
-    actualEnd: "2025-07-05",
-    deviations: 3,
-    comments: "Installation delayed due to weather.",
-  },
-]);
-
-// --- Filters ---
-const filteredInstallations = computed(() => {
-  const q = search.value.toLowerCase();
-  return installations.value.filter((i) =>
-    [
-      i.country,
-      i.province,
-      i.supplier,
-      i.product,
-      i.poNumber,
-      i.contract,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(q)
-  );
-});
-
-// --- Summary Cards ---
-const summaryCards = computed(() => {
-  const total = installations.value.length;
-  const completed = installations.value.filter((i) => i.deviations === 0).length;
-  const withDeviation = installations.value.filter((i) => i.deviations > 0).length;
-  const totalInstalled = installations.value.reduce((sum, i) => sum + i.qtyInstalled, 0);
-
-  return [
-    { label: "Total Projects", value: total, color: "primary" },
-    { label: "Completed On Time", value: completed, color: "success" },
-    { label: "With Deviations", value: withDeviation, color: "error" },
-    { label: "Total Units Installed", value: totalInstalled, color: "info" },
-  ];
-});
-
-// --- Pagination ---
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(filteredInstallations.value.length / itemsPerPage.value))
-);
-
-// --- Utils ---
-function formatDate(date) {
-  if (!date) return "-";
-  return new Date(date).toLocaleDateString();
+// Methods
+const fetchInstallations = async () => {
+  loading.value = true
+  try {
+    const response = await installationService.getInstallations(filters.value)
+    if (response.success) {
+      installations.value = response.data
+    }
+  } catch (error) {
+    console.error('Error fetching installations:', error)
+    // You can add a toast notification here
+  } finally {
+    loading.value = false
+  }
 }
 
-// --- Export CSV ---
-function exportCsv() {
-  const rows = [headers.map((h) => h.title).join(",")];
-  filteredInstallations.value.forEach((i) => {
-    rows.push(
-      [
-        i.country,
-        i.province,
-        i.supplier,
-        i.poNumber,
-        i.poItem,
-        i.contract,
-        i.product,
-        i.qtyReceived,
-        i.dateReceived,
-        i.qtyDelivered,
-        i.qtyInstalled,
-        i.plannedEnd,
-        i.actualEnd,
-        i.deviations,
-        i.comments,
-      ]
-        .map((c) => `"${String(c).replace(/"/g, '""')}"`)
-        .join(",")
-    );
-  });
-
-  const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "installation_report.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+const fetchStatistics = async () => {
+  try {
+    const response = await installationService.getDashboardSummary()
+    if (response.success) {
+      statistics.value = response.data
+    }
+  } catch (error) {
+    console.error('Error fetching statistics:', error)
+  }
 }
 
-// --- Row Click Navigation ---
-function goToDetails(event, { item }) {
- router.push(`/installation/${item.id}`);
+const viewInstallation = (installation) => {
+  selectedInstallation.value = installation
+  showDetailsDialog.value = true
 }
+
+const toggleVerification = async (installation) => {
+  try {
+    const newStatus = !installation.verified_by_health_officer
+    await installationService.updateVerification(installation.id, newStatus)
+    
+    // Update local state
+    installation.verified_by_health_officer = newStatus
+    
+    // You can add a success toast here
+    console.log(`Installation ${newStatus ? 'verified' : 'unverified'} successfully`)
+  } catch (error) {
+    console.error('Error updating verification:', error)
+    // You can add an error toast here
+  }
+}
+
+const clearFilters = () => {
+  filters.value = {
+    search: '',
+    state_id: null,
+    verified: null,
+    page: 1,
+    per_page: 10
+  }
+  fetchInstallations()
+}
+
+const clearSearch = () => {
+  filters.value.search = ''
+  fetchInstallations()
+}
+
+const exportData = async () => {
+  try {
+    const response = await installationService.exportInstallations(filters.value)
+    if (response.success) {
+      // You can implement download logic here
+      console.log('Export data:', response.data)
+      // Add toast notification for success
+    }
+  } catch (error) {
+    console.error('Error exporting data:', error)
+    // Add toast notification for error
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  fetchInstallations()
+  fetchStatistics()
+})
 </script>
 
 <style scoped>
-.title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 .stat-card {
-  border-radius: 12px;
-  text-align: center;
-  transition: transform 0.2s;
-}
-.stat-card:hover {
-  transform: scale(1.03);
-}
-.spacer {
-  flex: 1 1 auto;
-}
-.perpage-select {
-  width: 90px;
-}
-.clickable-table tbody tr {
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
-.clickable-table tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.installation-table {
+  width: 100%;
+}
+
+.installation-row:hover {
+  background-color: rgba(var(--v-theme-primary), 0.04);
+}
+
+.detail-item {
+  margin-bottom: 16px;
+}
+
+.detail-item label {
+  display: block;
+  margin-bottom: 4px;
 }
 </style>

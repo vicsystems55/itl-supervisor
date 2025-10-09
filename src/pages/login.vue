@@ -80,10 +80,10 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>!
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Please sign-in to your account to continue.
           </p>
         </VCardText>
         <VCardText>
@@ -133,37 +133,16 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                 </VBtn>
               </VCol>
 
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-body-1 text-center"
-              >
-                <span class="d-inline-block">
-                  New on our platform?
-                </span>
-                <a
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  href="javascript:void(0)"
-                >
-                  Create an account
-                </a>
-              </VCol>
+             
 
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4">or</span>
-                <VDivider />
-              </VCol>
+            
 
               <!-- auth providers -->
               <VCol
                 cols="12"
                 class="text-center"
               >
-                <AuthProvider />
+          
               </VCol>
             </VRow>
           </VForm>

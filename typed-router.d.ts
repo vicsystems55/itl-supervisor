@@ -24,6 +24,7 @@ declare module 'vue-router/auto-routes' {
     'accounts-id': RouteRecordInfo<'accounts-id', '/accounts/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'all-shipment': RouteRecordInfo<'all-shipment', '/AllShipment', Record<never, never>, Record<never, never>>,
     'annex-forms': RouteRecordInfo<'annex-forms', '/AnnexForms', Record<never, never>, Record<never, never>>,
+    'authorization': RouteRecordInfo<'authorization', '/Authorization', Record<never, never>, Record<never, never>>,
     'caption-generator': RouteRecordInfo<'caption-generator', '/caption-generator', Record<never, never>, Record<never, never>>,
     'dashboard': RouteRecordInfo<'dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
     'delivery-receipts': RouteRecordInfo<'delivery-receipts', '/DeliveryReceipts', Record<never, never>, Record<never, never>>,
@@ -56,6 +57,7 @@ declare module 'vue-router/auto-routes' {
     'technicians-id': RouteRecordInfo<'technicians-id', '/technicians/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'tracking-map': RouteRecordInfo<'tracking-map', '/TrackingMap', Record<never, never>, Record<never, never>>,
     'upgrade-plan': RouteRecordInfo<'upgrade-plan', '/upgrade-plan', Record<never, never>, Record<never, never>>,
+    'upload-database': RouteRecordInfo<'upload-database', '/UploadDatabase', Record<never, never>, Record<never, never>>,
     'vehicles-drivers': RouteRecordInfo<'vehicles-drivers', '/VehiclesDrivers', Record<never, never>, Record<never, never>>,
     'warehouses': RouteRecordInfo<'warehouses', '/Warehouses', Record<never, never>, Record<never, never>>,
   }

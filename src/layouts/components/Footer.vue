@@ -4,13 +4,8 @@
     <span class="d-flex align-center text-medium-emphasis">
       &copy;
       {{ new Date().getFullYear() }}
-      Made With
-      <VIcon
-        icon="tabler-heart-filled"
-        color="error"
-        size="1.25rem"
-        class="mx-1"
-      />
+     Developed by
+     
       By <a
         href="https://vicsystems.us"
         target="_blank"
@@ -19,7 +14,7 @@
       >Vicsystems Technologies Ltd.</a>
     </span>
     <!-- 👉 Footer: right content -->
-    <span class="d-md-flex gap-x-4 text-primary d-none">
+    <!-- <span class="d-md-flex gap-x-4 text-primary d-none">
       <a
         href="https://themeforest.net/licenses/standard"
         target="noopener noreferrer"
@@ -36,6 +31,6 @@
         href="https://vicsystems.us"
         target="noopener noreferrer"
       >Support</a>
-    </span>
+    </span> -->
   </div>
 </template>

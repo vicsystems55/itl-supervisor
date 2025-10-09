@@ -2,12 +2,18 @@
   <div class="warehouse-page page-container">
     <!-- Summary Section -->
     <v-card class="pa-4 mb-6">
-      <h2 class="mb-4">Warehouse Overview</h2>
+      <h2 class="mb-4 d-flex align-center">
+        <VIcon icon="tabler-building-warehouse" color="primary" class="me-2" />
+        Warehouse Overview
+      </h2>
 
       <v-row>
         <v-col cols="12" sm="6" md="3" v-for="stat in stats" :key="stat.label">
           <v-card class="pa-4 stat-card" :color="stat.color" dark>
-            <div class="text-h5 font-weight-bold">{{ stat.value }}</div>
+            <div class="d-flex align-center justify-center mb-2">
+              <VIcon :icon="stat.icon" size="26" class="me-2" />
+              <div class="text-h5 font-weight-bold">{{ stat.value }}</div>
+            </div>
             <div class="text-subtitle-1">{{ stat.label }}</div>
           </v-card>
         </v-col>
@@ -18,7 +24,11 @@
     <v-card>
       <v-card-title>
         <div class="title-row">
-          <h3>All Warehouses</h3>
+          <h3 class="d-flex align-center">
+            <VIcon icon="tabler-list-details" color="primary" class="me-2" />
+            All Warehouses
+          </h3>
+
           <div class="controls">
             <v-text-field
               v-model="search"
@@ -26,7 +36,7 @@
               dense
               hide-details
               clearable
-              append-icon="mdi-magnify"
+              append-icon="tabler-search"
             />
             <v-select
               v-model="statusFilter"
@@ -36,7 +46,9 @@
               class="status-select"
               label="Status"
             />
-            <v-btn color="primary" @click="exportCsv" small>Export CSV</v-btn>
+            <v-btn color="primary" @click="exportCsv" small>
+              <VIcon icon="tabler-download" start /> Export CSV
+            </v-btn>
           </div>
         </div>
       </v-card-title>
@@ -56,11 +68,11 @@
         </template>
 
         <template #item.actions="{ item }">
-          <v-btn icon small @click="viewWarehouse(item)">
-            <v-icon>mdi-eye</v-icon>
+          <v-btn icon size="small" color="info" @click="editWarehouse(item)">
+            <VIcon icon="tabler-edit" />
           </v-btn>
-          <v-btn icon small color="error" @click="deleteWarehouse(item)">
-            <v-icon>mdi-delete</v-icon>
+          <v-btn icon size="small" color="error" @click="deleteWarehouse(item)">
+            <VIcon icon="tabler-trash" />
           </v-btn>
         </template>
 
@@ -68,6 +80,97 @@
           <v-card-text>No warehouses found.</v-card-text>
         </template>
       </v-data-table>
+<v-dialog v-model="editDialog" max-width="600px" persistent>
+  <v-card>
+    <v-card-title>
+      <VIcon icon="tabler-edit" class="me-2" color="primary" />
+      Edit Warehouse
+    </v-card-title>
+
+    <v-card-text>
+      <VForm @submit.prevent="saveWarehouse">
+        <VRow>
+          <!-- Name -->
+          <VCol cols="12">
+            <AppTextField
+              v-model="selectedWarehouse.name"
+              label="Name"
+              placeholder="e.g. Central Warehouse"
+            />
+          </VCol>
+
+          <!-- Code -->
+          <VCol cols="12">
+            <AppTextField
+              v-model="selectedWarehouse.code"
+              label="Code"
+              placeholder="e.g. WH-001"
+            />
+          </VCol>
+
+          <!-- City & State (side by side) -->
+          <VCol cols="6">
+            <AppTextField
+              v-model="selectedWarehouse.city"
+              label="City"
+              placeholder="e.g. Lagos"
+            />
+          </VCol>
+          <VCol cols="6">
+            <AppTextField
+              v-model="selectedWarehouse.state"
+              label="State"
+              placeholder="e.g. Lagos"
+            />
+          </VCol>
+
+          <!-- Country -->
+          <VCol cols="12">
+            <AppTextField
+              v-model="selectedWarehouse.country"
+              label="Country"
+              placeholder="e.g. Nigeria"
+            />
+          </VCol>
+
+          <!-- Contact Person -->
+          <VCol cols="12">
+            <AppTextField
+              v-model="selectedWarehouse.contact_person"
+              label="Contact Person"
+              placeholder="e.g. John Doe"
+            />
+          </VCol>
+
+          <!-- Contact Phone -->
+          <VCol cols="12">
+            <AppTextField
+              v-model="selectedWarehouse.contact_phone"
+              label="Phone"
+              placeholder="e.g. 08012345678"
+            />
+          </VCol>
+
+          <!-- Active Switch -->
+          <VCol cols="12">
+            <v-switch
+              v-model="selectedWarehouse.active"
+              label="Active"
+            />
+          </VCol>
+
+          <!-- Actions -->
+          <VCol cols="12" class="d-flex justify-end">
+            <VBtn variant="text" @click="editDialog = false">Cancel</VBtn>
+            <VBtn color="primary" type="submit" class="ms-2">Save</VBtn>
+          </VCol>
+        </VRow>
+      </VForm>
+    </v-card-text>
+  </v-card>
+</v-dialog>
+
+
 
       <!-- Pagination -->
       <v-card-actions>
@@ -86,133 +189,135 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue"
+import warehouseService from "@/services/wareHouseService"
+import { toast } from "vue3-toastify" // ✅ new toast import
+import "vue3-toastify/dist/index.css"
 
-// Reactive state
-const search = ref("");
-const statusFilter = ref("All");
-const page = ref(1);
-const itemsPerPage = ref(10);
+// State
+const warehouses = ref([])
+const loading = ref(false)
+const search = ref("")
+const statusFilter = ref("All")
+const page = ref(1)
+const itemsPerPage = ref(10)
 
-// Data headers
+// Modal state
+const editDialog = ref(false)
+const selectedWarehouse = ref(null)
+
+// Table headers
 const headers = [
-  { title: "Warehouse ID", key: "id" },
+  { title: "Code", key: "code" },
   { title: "Name", key: "name" },
-  { title: "Location", key: "location" },
-  { title: "Capacity (tons)", key: "capacity" },
-  { title: "Used Capacity (%)", key: "used" },
-  { title: "Status", key: "status" },
+  { title: "City", key: "city" },
+  { title: "State", key: "state" },
+  { title: "Country", key: "country" },
+  { title: "Contact Person", key: "contact_person" },
+  { title: "Phone", key: "contact_phone" },
+  { title: "Status", key: "active" },
   { title: "Actions", key: "actions" },
-];
+]
 
-const statusOptions = ["All", "Active", "Inactive"];
+const statusOptions = ["All", "Active", "Inactive"]
 
-// Mock Data
-const warehouses = ref([
-  {
-    id: "WH-001",
-    name: "Central Warehouse",
-    location: "Lagos",
-    capacity: 5000,
-    used: 80,
-    status: "Active",
-  },
-  {
-    id: "WH-002",
-    name: "Northern Depot",
-    location: "Abuja",
-    capacity: 3000,
-    used: 60,
-    status: "Active",
-  },
-  {
-    id: "WH-003",
-    name: "Eastern Hub",
-    location: "Enugu",
-    capacity: 2500,
-    used: 40,
-    status: "Inactive",
-  },
-  {
-    id: "WH-004",
-    name: "Western Storage",
-    location: "Ibadan",
-    capacity: 3500,
-    used: 75,
-    status: "Active",
-  },
-]);
+// ✅ Fetch warehouses from API
+async function loadWarehouses() {
+  try {
+    loading.value = true
+    warehouses.value = await warehouseService.getAll()
+  } catch (err) {
+    console.error("Failed to load warehouses:", err)
+    toast.error("Error loading warehouses ⚠️")
+  } finally {
+    loading.value = false
+  }
+}
 
-// Computed Filters
+onMounted(loadWarehouses)
+
+// 🧮 Filters
 const filteredWarehouses = computed(() => {
-  const q = search.value?.toLowerCase() ?? "";
+  const q = search.value.toLowerCase()
   return warehouses.value.filter((w) => {
+    const status = w.active ? "Active" : "Inactive"
     const matchesStatus =
-      statusFilter.value === "All" || w.status === statusFilter.value;
+      statusFilter.value === "All" || status === statusFilter.value
     const matchesSearch =
       !q ||
-      w.name.toLowerCase().includes(q) ||
-      w.location.toLowerCase().includes(q) ||
-      w.id.toLowerCase().includes(q);
-    return matchesStatus && matchesSearch;
-  });
-});
-
-// Summary Cards
-const stats = computed(() => {
-  const total = warehouses.value.length;
-  const active = warehouses.value.filter((w) => w.status === "Active").length;
-  const inactive = total - active;
-  const avgUsed =
-    Math.round(
-      warehouses.value.reduce((sum, w) => sum + w.used, 0) / total
-    ) || 0;
-
-  return [
-    { label: "Total Warehouses", value: total, color: "primary" },
-    { label: "Active Warehouses", value: active, color: "success" },
-    { label: "Inactive", value: inactive, color: "error" },
-    { label: "Avg. Capacity Used (%)", value: avgUsed, color: "info" },
-  ];
-});
+      w.name?.toLowerCase().includes(q) ||
+      w.city?.toLowerCase().includes(q) ||
+      w.code?.toLowerCase().includes(q)
+    return matchesStatus && matchesSearch
+  })
+})
 
 const pageCount = computed(() =>
   Math.max(1, Math.ceil(filteredWarehouses.value.length / itemsPerPage.value))
-);
+)
 
-// Actions
-function viewWarehouse(item) {
-  console.log("View warehouse:", item);
+// ✏️ Open edit dialog
+function editWarehouse(item) {
+  selectedWarehouse.value = { ...item } // clone
+  editDialog.value = true
 }
 
-function deleteWarehouse(item) {
-  const index = warehouses.value.findIndex((w) => w.id === item.id);
-  if (index !== -1) warehouses.value.splice(index, 1);
+// 💾 Save warehouse update
+async function saveWarehouse() {
+  try {
+    await warehouseService.update(selectedWarehouse.value.id, selectedWarehouse.value)
+    toast.success("✅ Warehouse updated successfully")
+    editDialog.value = false
+    await loadWarehouses()
+  } catch (err) {
+    console.error("Update failed:", err)
+    toast.error("❌ Failed to update warehouse")
+  }
 }
 
-// Export CSV
+// 🗑 Delete warehouse with confirmation
+async function deleteWarehouse(item) {
+  if (!confirm(`Are you sure you want to delete "${item.name}"?`)) return
+  try {
+    await warehouseService.delete(item.id)
+    toast.success("🗑️ Warehouse deleted")
+    await loadWarehouses()
+  } catch (err) {
+    console.error("Delete failed:", err)
+    toast.error("⚠️ Failed to delete warehouse")
+  }
+}
+
+// 📦 Export CSV (unchanged)
 function exportCsv() {
-  const rows = [headers.map((h) => h.title).join(",")];
-  filteredWarehouses.value.forEach((w) => {
-    rows.push(
-      [w.id, w.name, w.location, w.capacity, w.used, w.status]
-        .map((c) => `"${String(c).replace(/"/g, '""')}"`)
-        .join(",")
-    );
-  });
-
-  const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "warehouses.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const headersRow = headers.map((h) => h.title).join(",")
+  const rows = filteredWarehouses.value.map((w) =>
+    [
+      w.code,
+      w.name,
+      w.city,
+      w.state,
+      w.country,
+      w.contact_person,
+      w.contact_phone,
+      w.active ? "Active" : "Inactive",
+    ]
+      .map((c) => `"${String(c || "").replace(/"/g, '""')}"`)
+      .join(",")
+  )
+  const csv = [headersRow, ...rows].join("\n")
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "warehouses.csv"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 </script>
+
 
 <style scoped>
 .title-row {
