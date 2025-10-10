@@ -405,7 +405,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import installationService from '@/services/installationService'
-import { states, verificationOptions } from '@/util/states'
+import { states, verificationOptions } from '@/utils/states'
 
 // Reactive data
 const loading = ref(false)
