@@ -138,9 +138,9 @@ const uploadFacility = async () => {
     const formData = new FormData()
     formData.append('excel_file', facilityFile.value)
 
-  const { data } = await api.post('/importfacilities', formData, {
+  const { data } = await api.post('/importfacilities',  {
   headers: { 
-    'Content-Type': 'multipart/form-data',
+    // 'Content-Type': 'multipart/form-data',
     'Accept': 'application/json'
   }
 })
