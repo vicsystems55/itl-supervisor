@@ -10,12 +10,19 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
+// Import composables for auth and notifications
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
 definePage({
   meta: {
     layout: 'blank',
     public: true,
   },
 })
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const form = ref({
   email: '',
@@ -24,8 +31,38 @@ const form = ref({
 })
 
 const isPasswordVisible = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+// Login function
+const login = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const success = await authStore.login({
+      email: form.value.email,
+      password: form.value.password,
+      remember: form.value.remember
+    })
+
+    if (success) {
+      // Redirect to intended page or dashboard
+      const redirect = router.currentRoute.value.query.redirect || '/'
+      await router.push(redirect)
+    } else {
+      errorMessage.value = authStore.error || 'Login failed. Please try again.'
+    }
+  } catch (error) {
+    errorMessage.value = 'An error occurred during login. Please try again.'
+    console.error('Login error:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -86,17 +123,29 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
             Please sign-in to your account to continue.
           </p>
         </VCardText>
+        
+        <!-- Error Message -->
+        <VAlert
+          v-if="errorMessage"
+          color="error"
+          variant="tonal"
+          class="mb-4"
+        >
+          {{ errorMessage }}
+        </VAlert>
+
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="login">
             <VRow>
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
                   v-model="form.email"
                   autofocus
-                  label="Email or Username"
+                  label="Email"
                   type="email"
                   placeholder="johndoe@email.com"
+                  :disabled="isLoading"
                 />
               </VCol>
 
@@ -107,15 +156,17 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                   label="Password"
                   placeholder="············"
                   :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
+                  autocomplete="current-password"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :disabled="isLoading"
                 />
 
                 <div class="d-flex align-center flex-wrap justify-space-between my-6">
                   <VCheckbox
                     v-model="form.remember"
                     label="Remember me"
+                    :disabled="isLoading"
                   />
                   <a
                     class="text-primary"
@@ -128,21 +179,20 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                 <VBtn
                   block
                   type="submit"
+                  :loading="isLoading"
+                  :disabled="isLoading"
                 >
-                  Login
+                  <span v-if="!isLoading">Login</span>
+                  <span v-else>Logging in...</span>
                 </VBtn>
               </VCol>
-
-             
-
-            
 
               <!-- auth providers -->
               <VCol
                 cols="12"
                 class="text-center"
               >
-          
+                <!-- Add social login providers if needed -->
               </VCol>
             </VRow>
           </VForm>

@@ -201,10 +201,12 @@
               <th class="text-left">Facility</th>
               <th class="text-left">State</th>
               <th class="text-left">LGA</th>
-              <th class="text-left">Supplier</th>
-              <th class="text-left">Model</th>
-              <th class="text-left">Health Officer</th>
-              <th class="text-left">Status</th>
+              <!-- <th class="text-left">Supplier</th>
+              <th class="text-left">Model</th> -->
+              <th class="text-left">State CCO</th>
+              <th class="text-left">Delivery Status</th>
+              <th class="text-left">Installation Status</th>
+
               <th class="text-left">Actions</th>
             </tr>
           </thead>
@@ -271,20 +273,8 @@
               <td>
                 <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
               </td>
-              <td>
-                <div class="d-flex align-center">
-                  <VIcon icon="tabler-truck" class="me-2 text-success" size="18" />
-                  <span class="font-weight-medium">{{ installation.supplier }}</span>
-                </div>
-              </td>
-              <td>
-                <VChip
-                  variant="outlined"
-                  size="small"
-                >
-                  {{ installation.product_model }}
-                </VChip>
-              </td>
+             
+              
               <td>
                 <div v-if="installation.health_officer" class="d-flex align-center">
                   <VAvatar
@@ -299,22 +289,37 @@
                 </div>
                 <span v-else class="text-caption text-medium-emphasis">Not assigned</span>
               </td>
-              <td>
-                <VChip
-                  :color="installation.verified_by_health_officer ? 'success' : 'warning'"
-                  variant="flat"
-                  size="small"
-                  @click.stop="toggleVerification(installation)"
-                  style="cursor: pointer;"
-                >
-                  <VIcon
-                    :icon="installation.verified_by_health_officer ? 'tabler-check' : 'tabler-clock'"
-                    class="me-1"
-                    size="16"
-                  />
-                  {{ installation.verified_by_health_officer ? 'Verified' : 'Pending' }}
-                </VChip>
-              </td>
+             <td>
+  <!-- Delivery Status -->
+  <VChip
+    :color="installation.delivery_status === 'delivered' ? 'success' : 'error'"
+    variant="flat"
+    size="small"
+  >
+    <VIcon
+      :icon="installation.delivery_status === 'delivered' ? 'tabler-check' : 'tabler-x'"
+      class="me-1"
+      size="16"
+    />
+    {{ installation.delivery_status === 'delivered' ? 'Delivered' : 'Not Delivered' }}
+  </VChip>
+</td>
+
+<td>
+  <!-- Installation Status -->
+  <VChip
+    :color="installation.installation_status === 'installed' ? 'success' : 'error'"
+    variant="flat"
+    size="small"
+  >
+    <VIcon
+      :icon="installation.installation_status === 'installed' ? 'tabler-check' : 'tabler-x'"
+      class="me-1"
+      size="16"
+    />
+    {{ installation.installation_status === 'installed' ? 'Installed' : 'Not Installed' }}
+  </VChip>
+</td>
               <td>
                 <div class="d-flex gap-2">
                   <VBtn

@@ -169,9 +169,8 @@
               <th class="text-left">Facility</th>
               <th class="text-left">State</th>
               <th class="text-left">LGA</th>
-              <th class="text-left">Supplier</th>
-              <th class="text-left">Model</th>
-              <th class="text-left">Health Officer</th>
+             
+              <th class="text-left">State CCO</th>
               <th class="text-left">Status</th>
               <th class="text-left">Actions</th>
             </tr>
@@ -231,20 +230,8 @@
               <td>
                 <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
               </td>
-              <td>
-                <div class="d-flex align-center">
-                  <VIcon icon="tabler-truck" class="me-2 text-success" size="18" />
-                  <span class="font-weight-medium">{{ installation.supplier }}</span>
-                </div>
-              </td>
-              <td>
-                <VChip
-                  variant="outlined"
-                  size="small"
-                >
-                  {{ installation.product_model }}
-                </VChip>
-              </td>
+             
+              
               <td>
                 <div v-if="installation.health_officer" class="d-flex align-center">
                   <VAvatar

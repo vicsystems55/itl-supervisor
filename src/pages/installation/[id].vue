@@ -234,7 +234,7 @@
           <VCard class="mb-6">
             <VCardTitle class="d-flex align-center">
               <VIcon icon="tabler-user" class="me-2 text-primary" />
-              Health Officer
+              State CCO
             </VCardTitle>
             <VDivider />
             <VCardText>

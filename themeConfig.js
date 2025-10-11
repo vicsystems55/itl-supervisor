@@ -4,7 +4,7 @@ import { breakpointsVuetifyV3 } from '@vueuse/core'
 import { VIcon } from 'vuetify/components/VIcon'
 
 // ❗ Logo SVG must be imported with ?raw suffix
-import logo from '@images/logo.png'
+import logo from '@/assets/images/logo.png'
 import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layouts/enums'
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
@@ -15,7 +15,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     }, [
       h('img', {
         src: logo,
-        alt: 'ShareButter Logo',
+        alt: 'ITL Logo',
         style: 'height: 32px;', // ⬅️ adjust as needed
       }),
     ]),

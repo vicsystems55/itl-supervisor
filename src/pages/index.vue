@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import {
   VBtn,
   VCard,
@@ -11,28 +12,69 @@ import {
   VRow,
 } from "vuetify/components";
 
-// Example widgets (you can later create real components for these)
 import RecentActivityFeed from "@/components/RecentActivityFeed.vue";
 import InstallationMap from "@/components/InstallationMap.vue";
 import TotalShipmentsCard from "@/components/TotalShipmentsCard.vue";
+import installationService from '@/services/installationService'
 
-// Fake summary data (replace with API/store data)
-const user = {
+// Reactive data
+const user = ref({
   name: "Project Admin",
   role: "Operations Lead",
   status: "Online",
   color: "success",
-};
+});
 
-const kpiStats = {
-  totalShipments: 185,
+const kpiStats = ref({
+  totalInstallations: 0,
+  verifiedInstallations: 0,
+  pendingVerification: 0,
+  installationsByState: [],
+  recentInstallations: []
+});
+
+const loading = ref(true)
+const error = ref(null)
+
+// Fetch dashboard data
+const fetchDashboardData = async () => {
+  try {
+    loading.value = true
+    const statsResponse = await installationService.getStatistics()
+    
+    if (statsResponse.success) {
+      const stats = statsResponse.data
+      kpiStats.value = {
+        totalInstallations: stats.total_installations,
+        verifiedInstallations: stats.verified_installations,
+        pendingVerification: stats.pending_verification,
+        installationsByState: stats.installations_by_state,
+        recentInstallations: stats.recent_installations,
+        installationsBySupplier: stats.installations_by_supplier,
+        installationsByModel: stats.installations_by_model
+      }
+    }
+  } catch (err) {
+    error.value = 'Failed to load dashboard data'
+    console.error('Dashboard error:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Example delivery stats (you might want to create separate endpoints for these)
+const deliveryStats = ref({
   delivered: 120,
   onRoute: 45,
   delayed: 10,
   installations: 98,
   maintenance: 7,
   warehouses: 5,
-};
+})
+
+onMounted(() => {
+  fetchDashboardData()
+})
 </script>
 
 <template>
@@ -65,8 +107,9 @@ const kpiStats = {
           color="primary"
           variant="flat"
           prepend-icon="tabler-truck-delivery"
+          :to="{ name: 'installation' }"
         >
-          View Active Routes
+          View Installations
         </VBtn>
         <VBtn color="success" variant="outlined" prepend-icon="tabler-report">
           Generate Report
@@ -75,96 +118,126 @@ const kpiStats = {
     </div>
   </VCard>
 
+  <!-- Loading State -->
+  <div v-if="loading" class="text-center py-8">
+    <VProgressCircular indeterminate size="64" />
+    <div class="mt-2">Loading dashboard data...</div>
+  </div>
+
+  <!-- Error State -->
+  <div v-else-if="error" class="text-center py-8">
+    <VIcon icon="tabler-alert-circle" size="64" color="error" />
+    <div class="mt-2 text-error">{{ error }}</div>
+    <VBtn @click="fetchDashboardData" class="mt-4" color="primary">
+      Retry
+    </VBtn>
+  </div>
+
   <!-- KPI Row -->
-  <VRow class="match-height">
-    <!-- Total Shipments -->
-    <VCol cols="12" md="4">
+  <VRow v-else class="match-height">
+    <!-- Total Installations -->
+    <VCol cols="12" md="3">
       <TotalShipmentsCard
-        title="Total Shipments"
-        :count="kpiStats.totalShipments"
-        subtitle="Overall consignments across Nigeria"
+        title="Total Installations"
+        :count="kpiStats.totalInstallations"
+        subtitle="Overall installations across Nigeria"
         icon="tabler-package"
         color="primary"
       />
     </VCol>
 
-    <!-- Shipment Status: three small cards -->
-    <VCol cols="12" md="4">
+    <!-- Verification Status -->
+    <VCol cols="12" md="3">
       <div class="d-flex flex-column gap-3">
-        <VCard class="pa-3 status-card delivered" elevation="0">
+        <VCard class="pa-3 status-card verified" elevation="0">
           <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center gap-3">
               <VIcon icon="tabler-check" size="28" color="success" />
               <div>
                 <div class="text-subtitle-1 font-weight-bold">
-                  {{ kpiStats.delivered }}
+                  {{ kpiStats.verifiedInstallations }}
                 </div>
-                <div class="text-caption text-secondary">Delivered</div>
+                <div class="text-caption text-secondary">Verified</div>
               </div>
             </div>
-            <div class="status-shade delivered-shade" />
+            <div class="status-shade verified-shade" />
           </div>
         </VCard>
 
-        <VCard class="pa-3 status-card onroute" elevation="0">
+        <VCard class="pa-3 status-card pending" elevation="0">
           <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center gap-3">
-              <VIcon icon="tabler-truck" size="28" color="info" />
+              <VIcon icon="tabler-clock" size="28" color="warning" />
               <div>
                 <div class="text-subtitle-1 font-weight-bold">
-                  {{ kpiStats.onRoute }}
+                  {{ kpiStats.pendingVerification }}
                 </div>
-                <div class="text-caption text-secondary">On Route</div>
+                <div class="text-caption text-secondary">Pending Verification</div>
               </div>
             </div>
-            <div class="status-shade onroute-shade" />
-          </div>
-        </VCard>
-
-        <VCard class="pa-3 status-card delayed" elevation="0">
-          <div class="d-flex align-center justify-space-between">
-            <div class="d-flex align-center gap-3">
-              <VIcon icon="tabler-clock" size="28" color="error" />
-              <div>
-                <div class="text-subtitle-1 font-weight-bold">
-                  {{ kpiStats.delayed }}
-                </div>
-                <div class="text-caption text-secondary">Delayed</div>
-              </div>
-            </div>
-            <div class="status-shade delayed-shade" />
+            <div class="status-shade pending-shade" />
           </div>
         </VCard>
       </div>
     </VCol>
 
-    <!-- Installations & Maintenance -->
-    <VCol cols="12" md="4">
+    <!-- State Distribution -->
+    <VCol cols="12" md="3">
       <VCard class="pa-4" outlined>
         <VCardItem>
-          <VCardTitle class="text-h5 font-weight-bold"
-            >Field Operations</VCardTitle
-          >
+          <VCardTitle class="text-h6 font-weight-bold">
+            Top States
+          </VCardTitle>
+        </VCardItem>
+        <VCardText>
+          <div class="d-flex flex-column gap-2">
+            <div 
+              v-for="state in kpiStats.installationsByState.slice(0, 3)" 
+              :key="state.id"
+              class="d-flex align-center justify-space-between"
+            >
+              <span class="text-truncate" :title="state.name">
+                {{ state.name }}
+              </span>
+              <VChip color="primary" size="small" label>
+                {{ state.installations_count }}
+              </VChip>
+            </div>
+            <div v-if="kpiStats.installationsByState.length > 3" class="text-caption text-center text-medium-emphasis">
+              +{{ kpiStats.installationsByState.length - 3 }} more states
+            </div>
+          </div>
+        </VCardText>
+      </VCard>
+    </VCol>
+
+    <!-- Quick Stats -->
+    <VCol cols="12" md="3">
+      <VCard class="pa-4" outlined>
+        <VCardItem>
+          <VCardTitle class="text-h6 font-weight-bold">
+            Quick Stats
+          </VCardTitle>
         </VCardItem>
         <VCardText>
           <div class="d-flex flex-column gap-2">
             <div class="d-flex align-center justify-space-between">
-              <span>Installations Completed</span>
-              <VChip color="primary" size="small" label>{{
-                kpiStats.installations
-              }}</VChip>
+              <span>Suppliers</span>
+              <VChip color="secondary" size="small" label>
+                {{ kpiStats.installationsBySupplier?.length || 0 }}
+              </VChip>
             </div>
             <div class="d-flex align-center justify-space-between">
-              <span>Maintenance Cases</span>
-              <VChip color="warning" size="small" label>{{
-                kpiStats.maintenance
-              }}</VChip>
+              <span>Product Models</span>
+              <VChip color="info" size="small" label>
+                {{ kpiStats.installationsByModel?.length || 0 }}
+              </VChip>
             </div>
             <div class="d-flex align-center justify-space-between">
-              <span>Warehouses Active</span>
-              <VChip color="secondary" size="small" label>{{
-                kpiStats.warehouses
-              }}</VChip>
+              <span>Recent Activity</span>
+              <VChip color="success" size="small" label>
+                {{ kpiStats.recentInstallations?.length || 0 }}
+              </VChip>
             </div>
           </div>
         </VCardText>
@@ -172,31 +245,29 @@ const kpiStats = {
     </VCol>
   </VRow>
 
-  <!-- Activity and Route Overview -->
+  <!-- Activity and Map Overview -->
   <VRow class="match-height mt-2">
-    <!-- Recent Activities -->
+    <!-- Installation Map -->
     <VCol cols="12" md="8">
       <VCard class="pa-4 py-3" outlined>
         <VCardItem>
-          <VCardTitle class="text-h5 font-weight-bold"
-            >Installation Map</VCardTitle
-          >
+          <VCardTitle class="text-h5 font-weight-bold">
+            Installation Map
+          </VCardTitle>
         </VCardItem>
-
-          <InstallationMap />
-     
+       <InstallationMap :installations="kpiStats.recentInstallations" />
       </VCard>
     </VCol>
 
-    <!-- Route / Delivery Timeline -->
+    <!-- Recent Activity -->
     <VCol cols="12" md="4">
       <VCard class="pa-4" outlined>
         <VCardItem>
-          <VCardTitle class="text-h5 font-weight-bold"
-            >Route Status Timeline</VCardTitle
-          >
+          <VCardTitle class="text-h5 font-weight-bold">
+            Recent Installations
+          </VCardTitle>
         </VCardItem>
-          <RecentActivityFeed />
+        <!-- <RecentActivityFeed :installations="kpiStats.recentInstallations" /> -->
       </VCard>
     </VCol>
   </VRow>
@@ -218,7 +289,7 @@ const kpiStats = {
   inline-size: 56px;
 }
 
-.delivered-shade {
+.verified-shade {
   background: linear-gradient(
     135deg,
     rgba(40, 167, 69, 8%),
@@ -226,19 +297,11 @@ const kpiStats = {
   );
 }
 
-.onroute-shade {
+.pending-shade {
   background: linear-gradient(
     135deg,
-    rgba(13, 202, 240, 8%),
-    rgba(13, 202, 240, 2%)
-  );
-}
-
-.delayed-shade {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 77, 77, 8%),
-    rgba(255, 77, 77, 2%)
+    rgba(255, 193, 7, 8%),
+    rgba(255, 193, 7, 2%)
   );
 }
 </style>

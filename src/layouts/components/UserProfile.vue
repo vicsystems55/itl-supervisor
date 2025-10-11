@@ -1,5 +1,12 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
 import avatar1 from '@images/avatars/avatar-1.png'
+
+const authStore = useAuthStore()
+
+// You can access user data like this:
+// const userName = computed(() => authStore.user?.name || 'User')
+// const userRole = computed(() => authStore.user?.role || 'User')
 </script>
 
 <template>
@@ -48,9 +55,9 @@ import avatar1 from '@images/avatars/avatar-1.png'
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ authStore.user?.name || 'John Doe' }}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle>{{ authStore.user?.role || 'Admin' }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
@@ -81,37 +88,11 @@ import avatar1 from '@images/avatars/avatar-1.png'
             <VListItemTitle>Settings</VListItemTitle>
           </VListItem>
 
-          <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-currency-dollar"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-help"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>FAQ</VListItemTitle>
-          </VListItem>
-
           <!-- Divider -->
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="authStore.logout()">
             <template #prepend>
               <VIcon
                 class="me-2"
