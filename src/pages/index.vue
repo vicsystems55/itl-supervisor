@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   VBtn,
   VCard,
@@ -10,6 +10,7 @@ import {
   VCol,
   VIcon,
   VRow,
+  VProgressCircular,
 } from "vuetify/components";
 
 import RecentActivityFeed from "@/components/RecentActivityFeed.vue";
@@ -19,8 +20,8 @@ import installationService from '@/services/installationService'
 
 // Reactive data
 const user = ref({
-  name: "Project Admin",
-  role: "Operations Lead",
+  name: "Guest User",
+  role: "Guest",
   status: "Online",
   color: "success",
 });
@@ -33,8 +34,63 @@ const kpiStats = ref({
   recentInstallations: []
 });
 
+// NEW: Store all installations for the map
+const allInstallations = ref([])
+
 const loading = ref(true)
 const error = ref(null)
+
+const getUserFromSession = () => {
+  try {
+    const userDataString = sessionStorage.getItem('user_data')
+    
+    if (userDataString) {
+      const userData = JSON.parse(userDataString)
+      
+      if (userData && userData.name) {
+        user.value = {
+          name: userData.name,
+          role: userData.role || 'User',
+          status: "Online",
+          color: "success",
+        }
+        return
+      }
+    }
+    
+    const fallbackRole = localStorage.getItem('role')
+    const fallbackName = localStorage.getItem('userName') || "Project Admin"
+    
+    user.value = {
+      name: fallbackName,
+      role: fallbackRole || 'User',
+      status: "Online",
+      color: "success",
+    }
+    
+  } catch (err) {
+    console.error('Error parsing user data from sessionStorage:', err)
+    user.value = {
+      name: "Project Admin",
+      role: "Operations Lead",
+      status: "Online",
+      color: "success",
+    }
+  }
+}
+
+// NEW: Fetch all installations for the map
+const fetchAllInstallations = async () => {
+  try {
+    const response = await installationService.getInstallations()
+    if (response.success) {
+      allInstallations.value = response.data.data || [] // Adjust based on your API response structure
+    }
+  } catch (err) {
+    console.error('Error fetching installations for map:', err)
+    // Don't set error here - we can still show the dashboard without the map
+  }
+}
 
 // Fetch dashboard data
 const fetchDashboardData = async () => {
@@ -62,18 +118,35 @@ const fetchDashboardData = async () => {
   }
 }
 
-// Example delivery stats (you might want to create separate endpoints for these)
-const deliveryStats = ref({
-  delivered: 120,
-  onRoute: 45,
-  delayed: 10,
-  installations: 98,
-  maintenance: 7,
-  warehouses: 5,
+// NEW: Process installations for the map
+const processedInstallations = computed(() => {
+  return allInstallations.value.map(installation => ({
+    ...installation,
+    // Ensure we have the required nested structure
+    facility: installation.facility || {},
+    delivery_status: installation.delivery_status || 'not delivered',
+    installation_status: installation.installation_status || 'not installed'
+  }))
 })
 
-onMounted(() => {
-  fetchDashboardData()
+// Debug computed property to check what data is being sent
+const debugInstallations = computed(() => {
+  console.log('Sending to InstallationMap:', {
+    total: processedInstallations.value.length,
+    sample: processedInstallations.value[0],
+    hasFacilityState: processedInstallations.value[0]?.facility?.state?.name
+  })
+  return processedInstallations.value
+})
+
+onMounted(async () => {
+  getUserFromSession()
+  
+  // Fetch both dashboard stats and installations for map
+  await Promise.all([
+    fetchDashboardData(),
+    fetchAllInstallations()
+  ])
 })
 </script>
 
@@ -254,8 +327,14 @@ onMounted(() => {
           <VCardTitle class="text-h5 font-weight-bold">
             Installation Map
           </VCardTitle>
+          <template #append>
+            <VChip color="primary" variant="tonal" size="small">
+              {{ allInstallations.length }} installations
+            </VChip>
+          </template>
         </VCardItem>
-       <InstallationMap :installations="kpiStats.recentInstallations" />
+        <!-- Pass the processed installations to the map -->
+        <InstallationMap :installations="debugInstallations" />
       </VCard>
     </VCol>
 

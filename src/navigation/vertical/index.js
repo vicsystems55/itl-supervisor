@@ -6,10 +6,12 @@ const loading = ref(true)
 
 // Simulate loader (replace with real async role check if needed)
 setTimeout(() => {
-  const role = localStorage.getItem('role')
+  // Get user data from session storage
+  const userData = JSON.parse(sessionStorage.getItem('user') || '{}')
+  const role = userData.role || localStorage.getItem('role') || ''
 
-  // ===== Admin / Default (no role found) =====
-  if (!role || role === '') {
+  // ===== Super Admin =====
+  if (role === 'Super Admin') {
     menu.value = [
       { heading: 'Main Navigation' },
       {
@@ -34,7 +36,6 @@ setTimeout(() => {
         children: [
           { title: 'Warehouses', to: { name: 'warehouses' } },
           { title: 'Vehicles & Drivers', to: { name: 'vehicles-drivers' } },
-       
         ],
       },
 
@@ -53,31 +54,8 @@ setTimeout(() => {
         icon: { icon: 'tabler-users-group' },
         children: [
           { title: 'Technicians Overview', to: { name: 'technicians' } },
-      
         ],
       },
-
-      // { heading: 'Training & Readiness' },
-      // {
-      //   title: 'Training Management',
-      //   icon: { icon: 'tabler-chalkboard' },
-      //   children: [
-      //     { title: 'Site Readiness', to: { path: '/' } },
-      //     { title: 'Training Sessions', to: { path: '/' } },
-      //     { title: 'Attendance Records', to: { path: '/' } },
-      //   ],
-      // },
-
-      // { heading: 'After-Sales & Maintenance' },
-      // {
-      //   title: 'Maintenance Operations',
-      //   icon: { icon: 'tabler-wrench' },
-      //   children: [
-      //     { title: 'Maintenance Requests', to: { path: '/' } },
-      //     { title: 'Spare Parts Inventory', to: { path: '/' } },
-      //     { title: 'Service Logs', to: { path: '/' } },
-      //   ],
-      // },
 
       { heading: 'Reports & Compliance' },
       {
@@ -99,12 +77,12 @@ setTimeout(() => {
           { title: 'Notifications', to: { name: 'notifications' } },
           { title: 'Authorization', to: { name: 'authorization' } },
           { title: 'Database', to: { name: 'upload-database' } },
-
         ],
       },
     ]
-  } else {
-    // ===== Field Users (Driver, Technician, etc.) =====
+  } 
+  // ===== Technician =====
+  else if (role === 'Technician Lead') {
     menu.value = [
       { heading: 'Quick Access' },
       {
@@ -124,6 +102,77 @@ setTimeout(() => {
         title: 'Profile',
         icon: { icon: 'tabler-user' },
         to: { path: '/' },
+      },
+    ]
+  }
+  // ===== Default (no role found or other roles) =====
+  else {
+    menu.value = [
+      { heading: 'Main Navigation' },
+      {
+        title: 'Dashboard',
+        icon: { icon: 'tabler-layout-dashboard' },
+        to: { path: '/' },
+      },
+
+      { heading: 'Distribution & Logistics' },
+      {
+        title: 'Shipments & Deliveries',
+        icon: { icon: 'tabler-truck' },
+        children: [
+          { title: 'All Shipments', to: { name: 'all-shipment' } },
+          { title: 'Delivery Receipts', to: { name: 'delivery-receipts' } },
+          { title: 'Tracking Map', to: { name: 'tracking-map' } },
+        ],
+      },
+      {
+        title: 'Assets & Fleet',
+        icon: { icon: 'tabler-building-warehouse' },
+        children: [
+          { title: 'Warehouses', to: { name: 'warehouses' } },
+          { title: 'Vehicles & Drivers', to: { name: 'vehicles-drivers' } },
+        ],
+      },
+
+      { heading: 'Installation & Commissioning' },
+      {
+        title: 'Installations',
+        icon: { icon: 'tabler-tools' },
+        children: [
+          { title: 'Installation List', to: { name: 'installation' } },
+          { title: 'Installation Photos', to: { name: 'installation-photos' } },
+          { title: 'Pre-commissioning Reports', to: { name: 'precommissioning-report' } },
+        ],
+      },
+      {
+        title: 'Teams & Technicians',
+        icon: { icon: 'tabler-users-group' },
+        children: [
+          { title: 'Technicians Overview', to: { name: 'technicians' } },
+        ],
+      },
+
+      { heading: 'Reports & Compliance' },
+      {
+        title: 'Reports & Annexes',
+        icon: { icon: 'tabler-report-analytics' },
+        children: [
+          { title: 'Project Reports', to: { name: 'project-reports' } },
+          { title: 'Annex Forms', to: { name: 'annex-forms' } },
+          { title: 'OAS Upload / Export', to: { name: 'oas-upload' } },
+        ],
+      },
+
+      { heading: 'Settings & Administration' },
+      {
+        title: 'System Settings',
+        icon: { icon: 'tabler-settings' },
+        children: [
+          { title: 'User Accounts', to: { name: 'accounts' } },
+          { title: 'Notifications', to: { name: 'notifications' } },
+          { title: 'Authorization', to: { name: 'authorization' } },
+          { title: 'Database', to: { name: 'upload-database' } },
+        ],
       },
     ]
   }

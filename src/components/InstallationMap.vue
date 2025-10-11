@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 
 const props = defineProps({
   installations: {
@@ -26,9 +26,14 @@ const lastTouchDistance = ref(0)
 const stateSummaries = computed(() => {
   const summaries = {}
   
+  console.log('Processing installations:', props.installations.length) // Debug
+  
   props.installations.forEach(installation => {
     const stateName = installation.facility?.state?.name
-    if (!stateName) return
+    if (!stateName) {
+      console.log('Installation missing state:', installation) // Debug
+      return
+    }
     
     if (!summaries[stateName]) {
       summaries[stateName] = {
@@ -89,42 +94,53 @@ const stateSummaries = computed(() => {
     }
   })
   
+  console.log('State summaries:', result) // Debug
   return result
 })
 
-// Get state color based on overall status
+// Get state color based on overall status - UPDATED LOGIC
 const getStateColor = (stateName) => {
   const summary = stateSummaries.value[stateName]
+  
+  // If no installations in this state
   if (!summary || summary.totalInstallations === 0) return '#e0e0e0' // No data - gray
   
   const { delivered, installed, totalInstallations } = summary
   
-  if (delivered === totalInstallations && installed === totalInstallations) {
-    return '#4caf50' // All delivered and installed - green
-  } else if (delivered === totalInstallations) {
-    return '#2196f3' // All delivered but not all installed - blue
+  console.log(`State ${stateName}: installed=${installed}, delivered=${delivered}, total=${totalInstallations}`) // Debug
+  
+  // NEW LOGIC: Any state with installations > 0 gets colored based on installation status
+  if (installed > 0) {
+    // States with installations
+    if (installed === totalInstallations) {
+      return '#4caf50' // All installations completed - green
+    } else if (installed > 0) {
+      return '#2196f3' // Some installations completed - blue
+    }
   } else if (delivered > 0) {
-    return '#ff9800' // Some delivered - orange
+    return '#ff9800' // Delivered but not installed - orange
   } else {
-    return '#f44336' // None delivered - red
+    return '#f44336' // Planned but not delivered - red
   }
+  
+  return '#e0e0e0' // Fallback
 }
 
-// Get state status text for tooltip
+// Get state status text for tooltip - UPDATED
 const getStateStatus = (stateName) => {
   const summary = stateSummaries.value[stateName]
   if (!summary || summary.totalInstallations === 0) return 'No installations'
   
   const { delivered, installed, totalInstallations } = summary
   
-  if (delivered === totalInstallations && installed === totalInstallations) {
-    return 'All Complete'
-  } else if (delivered === totalInstallations) {
-    return 'All Delivered'
+  if (installed === totalInstallations) {
+    return 'All Installed'
+  } else if (installed > 0) {
+    return 'Partial Installation'
   } else if (delivered > 0) {
-    return 'Partial Delivery'
+    return 'Delivered, Not Installed'
   } else {
-    return 'Not Started'
+    return 'Planned, Not Started'
   }
 }
 
@@ -138,6 +154,24 @@ const handleStateHover = (event) => {
       hoveredState.value = summary
       
       // Position tooltip near cursor
+      tooltipStyle.value = {
+        left: `${event.clientX + 10}px`,
+        top: `${event.clientY + 10}px`
+      }
+    } else {
+      // Show state name even if no data
+      hoveredState.value = {
+        name: stateName,
+        totalInstallations: 0,
+        delivered: 0,
+        installed: 0,
+        lgaCount: 0,
+        facilityCount: 0,
+        pendingDelivery: 0,
+        pendingInstallation: 0,
+        completionRate: 0
+      }
+      
       tooltipStyle.value = {
         left: `${event.clientX + 10}px`,
         top: `${event.clientY + 10}px`
@@ -267,24 +301,30 @@ const getTouchDistance = (touches) => {
   return Math.sqrt(dx * dx + dy * dy)
 }
 
-// Load and modify SVG
-onMounted(async () => {
-  try {
-    // Try to load SVG directly with Vite's asset handling
-    const svgModule = await import('@/assets/images/nigeria.svg?raw')
-    let svgText = svgModule.default
-    
-    // Modify SVG with state colors and interactivity
-    svgText = modifySVG(svgText)
-    svgContent.value = svgText
-  } catch (error) {
-    console.error('Error loading SVG:', error)
-    // Fallback: create a simple message
-    svgContent.value = '<div style="padding: 20px; text-align: center; color: #666;">Nigeria Map Visualization</div>'
-  } finally {
-    loading.value = false
+// Common Nigerian state name mappings (to handle variations)
+const stateNameMappings = {
+  'fct': 'Federal Capital Territory',
+  'abuja': 'Federal Capital Territory',
+  'fct abuja': 'Federal Capital Territory',
+  // Add other common variations as needed
+}
+
+// Normalize state name for matching
+const normalizeStateName = (name) => {
+  if (!name) return ''
+  
+  const lowerName = name.toLowerCase().trim()
+  
+  // Check if it's a known variation
+  if (stateNameMappings[lowerName]) {
+    return stateNameMappings[lowerName]
   }
-})
+  
+  // Convert to title case for consistency
+  return name.replace(/\w\S*/g, txt => 
+    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  )
+}
 
 // Function to modify SVG with state colors
 const modifySVG = (svgText) => {
@@ -311,22 +351,66 @@ const modifySVG = (svgText) => {
   // Color states based on their status
   const paths = svgElement.querySelectorAll('path')
   paths.forEach(path => {
-    const stateName = path.id || path.getAttribute('name') || path.getAttribute('class') || ''
+    let stateName = path.id || path.getAttribute('name') || path.getAttribute('class') || ''
+    
+    // Normalize the state name for matching
+    stateName = normalizeStateName(stateName)
     
     if (stateName) {
       path.classList.add('state-path')
-      path.setAttribute('fill', getStateColor(stateName))
+      const color = getStateColor(stateName)
+      console.log(`Setting color for ${stateName}: ${color}`) // Debug
+      path.setAttribute('fill', color)
       path.setAttribute('data-state', stateName)
+      
+      // Add title for basic tooltip
+      const title = doc.createElement('title')
+      title.textContent = stateName
+      path.appendChild(title)
     }
   })
   
   return new XMLSerializer().serializeToString(svgElement)
 }
 
-// Debug: log state summaries when installations change
-// watch(() => props.installations, (newInstallations) => {
-//   console.log('State summaries:', stateSummaries.value)
-// }, { immediate: true })
+// Update SVG colors when installations change
+const updateSVGColors = () => {
+  if (svgContent.value) {
+    const updatedSVG = modifySVG(svgContent.value)
+    svgContent.value = updatedSVG
+  }
+}
+
+// Load and modify SVG
+const loadSVG = async () => {
+  try {
+    // Try to load SVG directly with Vite's asset handling
+    const svgModule = await import('@/assets/images/nigeria.svg?raw')
+    let svgText = svgModule.default
+    
+    // Modify SVG with state colors and interactivity
+    svgText = modifySVG(svgText)
+    svgContent.value = svgText
+  } catch (error) {
+    console.error('Error loading SVG:', error)
+    // Fallback: create a simple message
+    svgContent.value = '<div style="padding: 20px; text-align: center; color: #666;">Nigeria Map Visualization</div>'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Watch for installation data changes and update colors
+watch(() => props.installations, (newInstallations) => {
+  console.log('Installations updated, updating map colors...', newInstallations.length)
+  nextTick(() => {
+    updateSVGColors()
+  })
+}, { deep: true })
+
+onMounted(() => {
+  loadSVG()
+})
 </script>
 
 <template>
@@ -419,36 +503,36 @@ const modifySVG = (svgText) => {
       </div>
     </div>
     
-    <!-- Status Legend -->
+    <!-- Status Legend - UPDATED -->
     <div class="status-legend">
       <div class="legend-title">Status Legend</div>
       <div class="legend-items">
         <div class="legend-item">
           <div class="legend-color" style="background-color: #4caf50;"></div>
           <div class="legend-text">
-            <strong>All Complete</strong>
-            <span>All delivered & installed</span>
+            <strong>All Installed</strong>
+            <span>All installations completed</span>
           </div>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #2196f3;"></div>
           <div class="legend-text">
-            <strong>All Delivered</strong>
-            <span>All delivered, pending installation</span>
+            <strong>Partial Installation</strong>
+            <span>Some installations completed</span>
           </div>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #ff9800;"></div>
           <div class="legend-text">
-            <strong>Partial Delivery</strong>
-            <span>Some delivered, some pending</span>
+            <strong>Delivered, Not Installed</strong>
+            <span>Equipment delivered but not installed</span>
           </div>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #f44336;"></div>
           <div class="legend-text">
-            <strong>Not Started</strong>
-            <span>No deliveries yet</span>
+            <strong>Planned, Not Started</strong>
+            <span>Installations planned but not started</span>
           </div>
         </div>
         <div class="legend-item">
@@ -474,7 +558,7 @@ const modifySVG = (svgText) => {
         </VChip>
       </div>
       
-      <div class="tooltip-stats">
+      <div v-if="hoveredState.totalInstallations > 0" class="tooltip-stats">
         <div class="stat-item">
           <VIcon icon="tabler-building" size="16" />
           <span>{{ hoveredState.lgaCount }} LGAs</span>
@@ -506,6 +590,12 @@ const modifySVG = (svgText) => {
         <div class="stat-item">
           <VIcon icon="tabler-chart-bar" size="16" />
           <span>{{ hoveredState.completionRate }}% Delivery Rate</span>
+        </div>
+      </div>
+      <div v-else class="tooltip-stats">
+        <div class="stat-item">
+          <VIcon icon="tabler-info-circle" size="16" color="info" />
+          <span>No installation data available</span>
         </div>
       </div>
     </div>

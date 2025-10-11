@@ -11,56 +11,69 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   // Login method
-  const login = async (credentials) => {
-    isLoading.value = true
-    error.value = null
+// Login method
+const login = async (credentials) => {
+  isLoading.value = true
+  error.value = null
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      })
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      // Store the token
-      token.value = data.access_token
-      
-      // Save to localStorage if "remember me" is checked, otherwise sessionStorage
-      if (credentials.remember) {
-        localStorage.setItem('auth_token', data.access_token)
-        sessionStorage.removeItem('auth_token') // Clear session storage
-      } else {
-        sessionStorage.setItem('auth_token', data.access_token)
-        localStorage.removeItem('auth_token') // Clear local storage
-      }
-
-      // Store user data if returned
-      if (data.user) {
-        user.value = data.user
-        if (credentials.remember) {
-          localStorage.setItem('user_data', JSON.stringify(data.user))
-        } else {
-          sessionStorage.setItem('user_data', JSON.stringify(data.user))
-        }
-      }
-
-      return true
-    } catch (err) {
-      error.value = err.message
-      return false
-    } finally {
-      isLoading.value = false
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed')
     }
+
+    // Store the token
+    token.value = data.access_token
+    
+    // Save to localStorage if "remember me" is checked, otherwise sessionStorage
+    if (credentials.remember) {
+      localStorage.setItem('auth_token', data.access_token)
+      sessionStorage.removeItem('auth_token') // Clear session storage
+    } else {
+      sessionStorage.setItem('auth_token', data.access_token)
+      localStorage.removeItem('auth_token') // Clear local storage
+    }
+
+    // Store user data WITH ROLE if returned
+    if (data.user) {
+      // Create user object with role from the separate roles field
+      const userData = {
+        ...data.user,
+        role: data.roles && data.roles.length > 0 ? data.roles[0] : 'User', // Get first role or default to 'User'
+        permissions: data.permissions || [] // Store permissions too if needed
+      }
+      
+      user.value = userData
+      
+      if (credentials.remember) {
+        localStorage.setItem('user_data', JSON.stringify(userData))
+                localStorage.setItem('role', data.roles && data.roles.length > 0 ? data.roles[0] : 'User') // No JSON.stringify
+
+      } else {
+        sessionStorage.setItem('user_data', JSON.stringify(userData))
+        localStorage.setItem('role', data.roles && data.roles.length > 0 ? data.roles[0] : 'User') // No JSON.stringify
+
+      }
+    }
+
+    return true
+  } catch (err) {
+    error.value = err.message
+    return false
+  } finally {
+    isLoading.value = false
   }
+}
 
   // Logout method - redirect to login page
   const logout = async () => {

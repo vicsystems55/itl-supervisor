@@ -97,6 +97,36 @@ class InstallationService {
       throw new Error(error.response?.data?.message || 'Export failed')
     }
   }
+
+  // NEW: Update delivery status
+  async updateDeliveryStatus(id, status) {
+    try {
+      const response = await api.patch(`/installations/${id}/delivery-status`, { status })
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update delivery status')
+    }
+  }
+
+  // NEW: Update installation status
+  async updateInstallationStatus(id, status) {
+    try {
+      const response = await api.patch(`/installations/${id}/installation-status`, { status })
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update installation status')
+    }
+  }
+
+  // NEW: Update installation (general update for multiple fields)
+  async updateInstallation(id, data) {
+    try {
+      const response = await api.put(`/installations/${id}`, data)
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update installation')
+    }
+  }
 }
 
 export default new InstallationService()
