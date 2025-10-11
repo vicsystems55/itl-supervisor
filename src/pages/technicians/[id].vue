@@ -22,13 +22,21 @@
         </div>
         
         <div class="d-flex gap-2">
-          <VBtn
+            <VBtn
+    color="primary"
+    prepend-icon="tabler-edit"
+    @click="isEditDialogVisible = true"
+    :disabled="loading" 
+  >
+    Edit Technician
+  </VBtn>
+          <!-- <VBtn
             color="primary"
             prepend-icon="tabler-edit"
             @click="isEditDialogVisible = true"
           >
             Edit Technician
-          </VBtn>
+          </VBtn> -->
           <VBtn
             color="secondary"
             prepend-icon="tabler-map-pin"
@@ -355,11 +363,11 @@
           </VCardTitle>
           <VCardText>
          <TechnicianForm
-        :technician-data="technician"
-        :user-id="userIdFromUrl"
-        @saved="handleTechnicianUpdated"
-        @cancel="isEditDialogVisible = false"
-      />
+  :technician-data="technician || {}"
+  :user-id="userIdFromUrl"
+  @saved="handleTechnicianUpdated"
+  @cancel="isEditDialogVisible = false"
+/>
           </VCardText>
         </VCard>
       </VDialog>
@@ -509,18 +517,26 @@ const fetchTechnicianDetails = async () => {
     const data = response.data
 
     if (data.success) {
-      user.value = data.user
-      // If you need the technician data separately, you might need another endpoint
-      // For now, we'll assume the user data contains what we need
-      technician.value = data.technician
+      user.value = data.user || {}
+      technician.value = data.technician || {}
       console.log('Fetched technician data:', technician.value)
+      
+      // If no data found, show a message but don't throw error
+      if (!data.user && !data.technician) {
+        console.warn('No technician data found for ID:', technicianId)
+        // You can set a flag here if you want to show a specific message
+      }
     } else {
       throw new Error(data.message || 'Failed to load technician data')
     }
   } catch (err) {
-    error.value = err.response?.data?.message || err.message
+    // error.value = err.response?.data?.message || err.message
     toast.error('Failed to load technician details')
     console.error('Error fetching technician:', err)
+    
+    // Even on error, allow editing to create new technician
+    user.value = {}
+    technician.value = {}
   } finally {
     loading.value = false
   }
@@ -599,9 +615,19 @@ const unassignSite = async (siteId) => {
 }
 
 const handleTechnicianUpdated = (updatedTechnician) => {
-  technician.value = { ...technician.value, ...updatedTechnician }
+  if (!technician.value) {
+    // If no existing technician, initialize with the new data
+    technician.value = updatedTechnician
+  } else {
+    // If technician exists, merge the updates
+    technician.value = { ...technician.value, ...updatedTechnician }
+  }
+  
   isEditDialogVisible.value = false
-  toast.success('Technician details updated successfully')
+  toast.success('Technician details saved successfully')
+  
+  // Refresh the data if this was a new technician creation
+  fetchTechnicianDetails()
 }
 
 const handleSiteAssigned = (newSite) => {

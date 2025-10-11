@@ -50,9 +50,22 @@ const login = async () => {
     })
 
     if (success) {
-      // Redirect to intended page or dashboard
-      const redirect = router.currentRoute.value.query.redirect || '/'
-      await router.push(redirect)
+      // Wait a brief moment for sessionStorage to be populated
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      // Check user role and redirect accordingly
+      const userRole = localStorage.getItem('role')
+      // localStorage or sessionStorage store as userRole = 'Technician Lead' or 'Technician'
+      // console.log('User Role:', userRole)
+      // Redirect based on role (Technician Lead to Technician Dashboard) 
+      
+      if (userRole === 'Technician Lead') {
+        await router.push({ name: 'technician-dashboard' })
+      } else {
+        // Redirect to intended page or default dashboard
+        const redirect = router.currentRoute.value.query.redirect || '/'
+        await router.push(redirect)
+      }
     } else {
       errorMessage.value = authStore.error || 'Login failed. Please try again.'
     }

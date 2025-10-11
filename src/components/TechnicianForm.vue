@@ -322,51 +322,33 @@ const initializeForm = async () => {
 
     // Fetch existing technician data for this user_id
     loading.value = true
+    // const technician = await fetchTechnicianByUserId(props.userId)
     
-    // Check if we have technicianData from props
-    if (props.technicianData) {
-      console.log('Using technicianData from props:', props.technicianData)
+    if (technicianData) {
       // Populate form with existing data
       formData.value = {
-        phone: props.technicianData.phone || '',
-        bank_name: props.technicianData.bank_name || '',
-        account_number: props.technicianData.account_number || '',
-        account_name: props.technicianData.account_name || '',
-        specialization: props.technicianData.specialization || '',
-        id_card_number: props.technicianData.id_card_number || '',
-        active: props.technicianData.active !== undefined ? props.technicianData.active : true
+        phone: technicianData.phone || '',
+        bank_name: technicianData.bank_name || '',
+        account_number: technicianData.account_number || '',
+        account_name: technicianData.account_name || '',
+        specialization: technicianData.specialization || '',
+        id_card_number: technicianData.id_card_number || '',
+        active: technicianData.active !== undefined ? technicianData.active : true
       }
-      existingTechnicianId.value = props.technicianData.id || null
-    } else {
-      // No technicianData provided, try to fetch from API
-      const technician = await fetchTechnicianByUserId(props.userId)
       
-      if (technician) {
-        // Populate form with fetched data
-        formData.value = {
-          phone: technician.phone || '',
-          bank_name: technician.bank_name || '',
-          account_number: technician.account_number || '',
-          account_name: technician.account_name || '',
-          specialization: technician.specialization || '',
-          id_card_number: technician.id_card_number || '',
-          active: technician.active !== undefined ? technician.active : true
-        }
-        existingTechnicianId.value = technician.id || null
-      } else {
-        // No existing technician found - this is fine for POST
-        // Reset form to default values
-        formData.value = {
-          phone: '',
-          bank_name: '',
-          account_number: '',
-          account_name: '',
-          specialization: '',
-          id_card_number: '',
-          active: true
-        }
-        existingTechnicianId.value = null
+    } else {
+      // No existing technician found - this is fine for POST
+      // Reset form to default values
+      formData.value = {
+        phone: '',
+        bank_name: '',
+        account_number: '',
+        account_name: '',
+        specialization: '',
+        id_card_number: '',
+        active: true
       }
+      existingTechnicianId.value = null
     }
     
     errors.value = {}
