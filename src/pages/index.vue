@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from "vue";
 import {
   VBtn,
   VCard,
@@ -16,7 +16,7 @@ import {
 import RecentActivityFeed from "@/components/RecentActivityFeed.vue";
 import InstallationMap from "@/components/InstallationMap.vue";
 import TotalShipmentsCard from "@/components/TotalShipmentsCard.vue";
-import installationService from '@/services/installationService'
+import installationService from "@/services/installationService";
 
 // Reactive data
 const user = ref({
@@ -31,75 +31,75 @@ const kpiStats = ref({
   verifiedInstallations: 0,
   pendingVerification: 0,
   installationsByState: [],
-  recentInstallations: []
+  recentInstallations: [],
 });
 
-// NEW: Store all installations for the map
-const allInstallations = ref([])
+// NEW: Store states data with installation details
+const statesData = ref([]);
 
-const loading = ref(true)
-const error = ref(null)
+const loading = ref(true);
+const error = ref(null);
 
 const getUserFromSession = () => {
   try {
-    const userDataString = sessionStorage.getItem('user_data')
-    
+    const userDataString = sessionStorage.getItem("user_data");
+
     if (userDataString) {
-      const userData = JSON.parse(userDataString)
-      
+      const userData = JSON.parse(userDataString);
+
       if (userData && userData.name) {
         user.value = {
           name: userData.name,
-          role: userData.role || 'User',
+          role: userData.role || "User",
           status: "Online",
           color: "success",
-        }
-        return
+        };
+        return;
       }
     }
-    
-    const fallbackRole = localStorage.getItem('role')
-    const fallbackName = localStorage.getItem('userName') || "Project Admin"
-    
+
+    const fallbackRole = localStorage.getItem("role");
+    const fallbackName = localStorage.getItem("userName") || "Project Admin";
+
     user.value = {
       name: fallbackName,
-      role: fallbackRole || 'User',
+      role: fallbackRole || "User",
       status: "Online",
       color: "success",
-    }
-    
+    };
   } catch (err) {
-    console.error('Error parsing user data from sessionStorage:', err)
+    console.error("Error parsing user data from sessionStorage:", err);
     user.value = {
       name: "Project Admin",
       role: "Operations Lead",
       status: "Online",
       color: "success",
-    }
+    };
   }
-}
+};
 
-// NEW: Fetch all installations for the map
-const fetchAllInstallations = async () => {
+// NEW: Fetch states with installation data
+const fetchStatesWithInstallations = async () => {
   try {
-    const response = await installationService.getInstallations()
+    const response = await installationService.getStatesWithInstallations();
     if (response.success) {
-      allInstallations.value = response.data.data || [] // Adjust based on your API response structure
+      statesData.value = response.data || [];
+      console.log("States data loaded:", statesData.value);
     }
   } catch (err) {
-    console.error('Error fetching installations for map:', err)
-    // Don't set error here - we can still show the dashboard without the map
+    console.error("Error fetching states data:", err);
+    error.value = "Failed to load states data";
   }
-}
+};
 
 // Fetch dashboard data
 const fetchDashboardData = async () => {
   try {
-    loading.value = true
-    const statsResponse = await installationService.getStatistics()
-    
+    loading.value = true;
+    const statsResponse = await installationService.getStatistics();
+
     if (statsResponse.success) {
-      const stats = statsResponse.data
+      const stats = statsResponse.data;
       kpiStats.value = {
         totalInstallations: stats.total_installations,
         verifiedInstallations: stats.verified_installations,
@@ -107,47 +107,101 @@ const fetchDashboardData = async () => {
         installationsByState: stats.installations_by_state,
         recentInstallations: stats.recent_installations,
         installationsBySupplier: stats.installations_by_supplier,
-        installationsByModel: stats.installations_by_model
-      }
+        installationsByModel: stats.installations_by_model,
+      };
     }
   } catch (err) {
-    error.value = 'Failed to load dashboard data'
-    console.error('Dashboard error:', err)
+    error.value = "Failed to load dashboard data";
+    console.error("Dashboard error:", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-// NEW: Process installations for the map
-const processedInstallations = computed(() => {
-  return allInstallations.value.map(installation => ({
-    ...installation,
-    // Ensure we have the required nested structure
-    facility: installation.facility || {},
-    delivery_status: installation.delivery_status || 'not delivered',
-    installation_status: installation.installation_status || 'not installed'
-  }))
-})
+// NEW: Process states data for display
+const processedStatesData = computed(() => {
+  return statesData.value.map((state) => ({
+    id: state.id,
+    name: state.name,
+    code: state.code,
+    latitude: state.latitude,
+    longitude: state.longitude,
+    installation_details: state.installation_details || {
+      total_supposed_installations: 0,
+      total_installed: 0,
+      total_delivered: 0,
+      installation_rate: 0,
+      delivery_rate: 0,
+    },
+  }));
+});
 
-// Debug computed property to check what data is being sent
-const debugInstallations = computed(() => {
-  console.log('Sending to InstallationMap:', {
-    total: processedInstallations.value.length,
-    sample: processedInstallations.value[0],
-    hasFacilityState: processedInstallations.value[0]?.facility?.state?.name
-  })
-  return processedInstallations.value
-})
+// NEW: Computed property for map markers from states data
+const stateMapMarkers = computed(() => {
+  return processedStatesData.value.map((state) => ({
+    id: state.id,
+    name: state.name,
+    latitude: state.latitude,
+    longitude: state.longitude,
+    installation_details: state.installation_details,
+    // You can add additional properties for the map here
+    marker_color: getMarkerColor(state.installation_details.installation_rate),
+    tooltip: `${state.name}: ${state.installation_details.total_installed}/${state.installation_details.total_supposed_installations} installed`,
+  }));
+});
+
+// NEW: Helper function to determine marker color based on installation rate
+const getMarkerColor = (installationRate) => {
+  if (installationRate >= 80) return "success";
+  if (installationRate >= 50) return "warning";
+  return "error";
+};
+
+// NEW: Computed property for state statistics summary
+const statesSummary = computed(() => {
+  if (!statesData.value.length) return null;
+
+  const totalStates = statesData.value.length;
+  const totalSupposedInstallations = statesData.value.reduce(
+    (sum, state) =>
+      sum + (state.installation_details?.total_supposed_installations || 0),
+    0
+  );
+  const totalInstalled = statesData.value.reduce(
+    (sum, state) => sum + (state.installation_details?.total_installed || 0),
+    0
+  );
+  const totalDelivered = statesData.value.reduce(
+    (sum, state) => sum + (state.installation_details?.total_delivered || 0),
+    0
+  );
+
+  const overallInstallationRate =
+    totalSupposedInstallations > 0
+      ? Math.round((totalInstalled / totalSupposedInstallations) * 100)
+      : 0;
+
+  const overallDeliveryRate =
+    totalSupposedInstallations > 0
+      ? Math.round((totalDelivered / totalSupposedInstallations) * 100)
+      : 0;
+
+  return {
+    totalStates,
+    totalSupposedInstallations,
+    totalInstalled,
+    totalDelivered,
+    overallInstallationRate,
+    overallDeliveryRate,
+  };
+});
 
 onMounted(async () => {
-  getUserFromSession()
-  
-  // Fetch both dashboard stats and installations for map
-  await Promise.all([
-    fetchDashboardData(),
-    fetchAllInstallations()
-  ])
-})
+  getUserFromSession();
+
+  // Fetch both dashboard stats and states data
+  await Promise.all([fetchDashboardData(), fetchStatesWithInstallations()]);
+});
 </script>
 
 <template>
@@ -156,38 +210,45 @@ onMounted(async () => {
     <div
       class="d-flex flex-column flex-sm-row justify-space-between align-center gap-4"
     >
-      <!-- Left: Greeting -->
-      <div>
-        <h4 class="text-h5 font-weight-medium mb-2">
-          👋 Welcome back, {{ user.name }}
-        </h4>
-        <div class="d-flex align-center">
-          <VIcon icon="tabler-user" color="primary" class="me-2" />
-          <span class="text-body-1">
-            Role: <strong>{{ user.role }}</strong>
-          </span>
+    <VRow>
+      <VCol cols="6" md="6">
+        <div>
+          <h4 class="text-h5 font-weight-medium mb-2">
+            👋 Welcome back, {{ user.name }}
+          </h4>
+          <div class="d-flex align-center">
+            <VIcon icon="tabler-user" color="primary" class="me-2" />
+            <span class="text-body-1">
+              Role: <strong>{{ user.role }}</strong>
+            </span>
+          </div>
+          <div class="mt-1">
+            <VChip :color="user.color" size="small" label>
+              Status: {{ user.status }}
+            </VChip>
+          </div>
         </div>
-        <div class="mt-1">
-          <VChip :color="user.color" size="small" label>
-            Status: {{ user.status }}
-          </VChip>
-        </div>
-      </div>
+      </VCol>
 
-      <!-- Right: Actions -->
-      <div class="d-flex gap-3">
-        <VBtn
-          color="primary"
-          variant="flat"
-          prepend-icon="tabler-truck-delivery"
-          :to="{ name: 'installation' }"
-        >
-          View Installations
-        </VBtn>
-        <VBtn color="success" variant="outlined" prepend-icon="tabler-report">
-          Generate Report
-        </VBtn>
-      </div>
+      <VCol cols="6" md="6">
+        <!-- Right: Actions -->
+        <div class="d-flex gap-1">
+          <VBtn
+            color="primary"
+            variant="flat"
+            prepend-icon="tabler-truck-delivery"
+            :to="{ name: 'installation' }"
+          >
+            View Installations
+          </VBtn>
+          <VBtn color="success" variant="outlined" prepend-icon="tabler-report">
+            Generate Report
+          </VBtn>
+        </div>
+      </VCol>
+      <!-- Left: Greeting -->
+
+    </VRow>
     </div>
   </VCard>
 
@@ -230,7 +291,7 @@ onMounted(async () => {
                 <div class="text-subtitle-1 font-weight-bold">
                   {{ kpiStats.verifiedInstallations }}
                 </div>
-                <div class="text-caption text-secondary">Verified</div>
+                <div class="text-caption text-secondary">Installations</div>
               </div>
             </div>
             <div class="status-shade verified-shade" />
@@ -245,7 +306,9 @@ onMounted(async () => {
                 <div class="text-subtitle-1 font-weight-bold">
                   {{ kpiStats.pendingVerification }}
                 </div>
-                <div class="text-caption text-secondary">Pending Verification</div>
+                <div class="text-caption text-secondary">
+                  Deliveries
+                </div>
               </div>
             </div>
             <div class="status-shade pending-shade" />
@@ -258,14 +321,12 @@ onMounted(async () => {
     <VCol cols="12" md="3">
       <VCard class="pa-4" outlined>
         <VCardItem>
-          <VCardTitle class="text-h6 font-weight-bold">
-            Top States
-          </VCardTitle>
+          <VCardTitle class="text-h6 font-weight-bold"> Top States </VCardTitle>
         </VCardItem>
         <VCardText>
           <div class="d-flex flex-column gap-2">
-            <div 
-              v-for="state in kpiStats.installationsByState.slice(0, 3)" 
+            <div
+              v-for="state in kpiStats.installationsByState.slice(0, 3)"
               :key="state.id"
               class="d-flex align-center justify-space-between"
             >
@@ -276,7 +337,10 @@ onMounted(async () => {
                 {{ state.installations_count }}
               </VChip>
             </div>
-            <div v-if="kpiStats.installationsByState.length > 3" class="text-caption text-center text-medium-emphasis">
+            <div
+              v-if="kpiStats.installationsByState.length > 3"
+              class="text-caption text-center text-medium-emphasis"
+            >
               +{{ kpiStats.installationsByState.length - 3 }} more states
             </div>
           </div>
@@ -321,34 +385,22 @@ onMounted(async () => {
   <!-- Activity and Map Overview -->
   <VRow class="match-height mt-2">
     <!-- Installation Map -->
-    <VCol cols="12" md="8">
-      <VCard class="pa-4 py-3" outlined>
-        <VCardItem>
-          <VCardTitle class="text-h5 font-weight-bold">
-            Installation Map
-          </VCardTitle>
-          <template #append>
-            <VChip color="primary" variant="tonal" size="small">
-              {{ allInstallations.length }} installations
-            </VChip>
-          </template>
-        </VCardItem>
-        <!-- Pass the processed installations to the map -->
-        <InstallationMap :installations="debugInstallations" />
-      </VCard>
+    <VCol cols="12" md="12">
+      <!-- Pass the processed installations to the map -->
+      <InstallationMap :installations="processedStatesData" />
     </VCol>
 
     <!-- Recent Activity -->
-    <VCol cols="12" md="4">
+    <!-- <VCol cols="12" md="4">
       <VCard class="pa-4" outlined>
         <VCardItem>
           <VCardTitle class="text-h5 font-weight-bold">
             Recent Installations
           </VCardTitle>
-        </VCardItem>
-        <!-- <RecentActivityFeed :installations="kpiStats.recentInstallations" /> -->
-      </VCard>
-    </VCol>
+        </VCardItem> -->
+    <!-- <RecentActivityFeed :installations="kpiStats.recentInstallations" /> -->
+    <!-- </VCard>
+    </VCol> -->
   </VRow>
 </template>
 

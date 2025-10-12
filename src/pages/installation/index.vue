@@ -112,7 +112,7 @@
           <VCol cols="12" sm="6" md="3">
             <AppSelect
               v-model="filters.state_id"
-              :items="states"
+              :items="stateOptions"
               label="State"
               placeholder="Select State"
               clearable
@@ -201,18 +201,15 @@
               <th class="text-left">Facility</th>
               <th class="text-left">State</th>
               <th class="text-left">LGA</th>
-              <!-- <th class="text-left">Supplier</th>
-              <th class="text-left">Model</th> -->
               <th class="text-left">State CCO</th>
               <th class="text-left">Delivery Status</th>
               <th class="text-left">Installation Status</th>
-
               <th class="text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="8" class="text-center py-8">
+              <td colspan="7" class="text-center py-8">
                 <VProgressCircular
                   indeterminate
                   color="primary"
@@ -222,7 +219,7 @@
             </tr>
 
             <tr v-else-if="installations.data.length === 0">
-              <td colspan="8" class="text-center py-8">
+              <td colspan="7" class="text-center py-8">
                 <VIcon icon="tabler-package-off" size="48" class="text-medium-emphasis mb-2" />
                 <div class="text-body-1 text-medium-emphasis">No installations found</div>
                 <VBtn
@@ -240,7 +237,6 @@
               v-for="installation in installations.data"
               :key="installation.id"
               class="installation-row"
-              @click="goToInstallationDetail(installation.id)"
             >
               <td>
                 <div class="d-flex align-center">
@@ -273,7 +269,6 @@
               <td>
                 <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
               </td>
-             
               
               <td>
                 <div v-if="installation.health_officer" class="d-flex align-center">
@@ -289,37 +284,41 @@
                 </div>
                 <span v-else class="text-caption text-medium-emphasis">Not assigned</span>
               </td>
-             <td>
-  <!-- Delivery Status -->
-  <VChip
-    :color="installation.delivery_status === 'delivered' ? 'success' : 'error'"
-    variant="flat"
-    size="small"
-  >
-    <VIcon
-      :icon="installation.delivery_status === 'delivered' ? 'tabler-check' : 'tabler-x'"
-      class="me-1"
-      size="16"
-    />
-    {{ installation.delivery_status === 'delivered' ? 'Delivered' : 'Not Delivered' }}
-  </VChip>
-</td>
+             
+              <td>
+                <VChip
+                  :color="getDeliveryStatusColor(installation.delivery_status)"
+                  variant="flat"
+                  size="small"
+                  @click.stop="openUpdateDialog(installation, 'delivery')"
+                  style="cursor: pointer;"
+                >
+                  <VIcon
+                    :icon="getDeliveryStatusIcon(installation.delivery_status)"
+                    class="me-1"
+                    size="16"
+                  />
+                  {{ formatStatus(installation.delivery_status) }}
+                </VChip>
+              </td>
 
-<td>
-  <!-- Installation Status -->
-  <VChip
-    :color="installation.installation_status === 'installed' ? 'success' : 'error'"
-    variant="flat"
-    size="small"
-  >
-    <VIcon
-      :icon="installation.installation_status === 'installed' ? 'tabler-check' : 'tabler-x'"
-      class="me-1"
-      size="16"
-    />
-    {{ installation.installation_status === 'installed' ? 'Installed' : 'Not Installed' }}
-  </VChip>
-</td>
+              <td>
+                <VChip
+                  :color="getInstallationStatusColor(installation.installation_status)"
+                  variant="flat"
+                  size="small"
+                  @click.stop="openUpdateDialog(installation, 'installation')"
+                  style="cursor: pointer;"
+                >
+                  <VIcon
+                    :icon="getInstallationStatusIcon(installation.installation_status)"
+                    class="me-1"
+                    size="16"
+                  />
+                  {{ formatStatus(installation.installation_status) }}
+                </VChip>
+              </td>
+              
               <td>
                 <div class="d-flex gap-2">
                   <VBtn
@@ -327,6 +326,17 @@
                     variant="text"
                     size="small"
                     color="primary"
+                    @click.stop="openUpdateDialog(installation, 'both')"
+                  >
+                    <VIcon icon="tabler-edit" size="20" />
+                    <VTooltip activator="parent" location="top">Update Status</VTooltip>
+                  </VBtn>
+
+                  <VBtn
+                    icon
+                    variant="text"
+                    size="small"
+                    color="info"
                     @click.stop="goToInstallationDetail(installation.id)"
                   >
                     <VIcon icon="tabler-eye" size="20" />
@@ -370,23 +380,147 @@
         </VRow>
       </VCardText>
     </VCard>
+
+    <!-- Update Status Dialog -->
+    <VDialog v-model="showUpdateDialog" max-width="500px">
+      <VCard>
+        <VCardTitle class="d-flex justify-space-between align-center">
+          <span>Update Installation Status</span>
+          <VBtn icon variant="text" @click="closeUpdateDialog">
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+        
+        <VCardText>
+          <VRow>
+            <!-- Facility Info -->
+            <VCol cols="12">
+              <div class="facility-info mb-4 pa-3 rounded bg-grey-lighten-4">
+                <div class="text-h6">{{ selectedInstallation?.facility?.name }}</div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ selectedInstallation?.facility?.state?.name }} • {{ selectedInstallation?.facility?.lga?.name }}
+                </div>
+              </div>
+            </VCol>
+
+            <!-- Delivery Status -->
+            <VCol cols="12" v-if="updateType !== 'installation'">
+              <AppSelect
+                v-model="updateData.delivery_status"
+                :items="deliveryStatusOptions"
+                label="Delivery Status"
+                placeholder="Select delivery status"
+              />
+            </VCol>
+
+            <!-- Installation Status -->
+            <VCol cols="12" v-if="updateType !== 'delivery'">
+              <AppSelect
+                v-model="updateData.installation_status"
+                :items="installationStatusOptions"
+                label="Installation Status"
+                placeholder="Select installation status"
+              />
+            </VCol>
+
+            <!-- Quick Status Buttons -->
+            <VCol cols="12" v-if="updateType === 'delivery' || updateType === 'both'">
+              <div class="quick-actions mb-4">
+                <div class="text-caption text-medium-emphasis mb-2">Quick Delivery Actions:</div>
+                <div class="d-flex flex-wrap gap-2">
+                  <VBtn
+                    v-for="status in deliveryStatuses"
+                    :key="status"
+                    size="small"
+                    :color="updateData.delivery_status === status ? 'primary' : 'secondary'"
+                    variant="outlined"
+                    @click="updateData.delivery_status = status"
+                  >
+                    {{ formatStatus(status) }}
+                  </VBtn>
+                </div>
+              </div>
+            </VCol>
+
+            <VCol cols="12" v-if="updateType === 'installation' || updateType === 'both'">
+              <div class="quick-actions mb-4">
+                <div class="text-caption text-medium-emphasis mb-2">Quick Installation Actions:</div>
+                <div class="d-flex flex-wrap gap-2">
+                  <VBtn
+                    v-for="status in installationStatuses"
+                    :key="status"
+                    size="small"
+                    :color="updateData.installation_status === status ? 'primary' : 'secondary'"
+                    variant="outlined"
+                    @click="updateData.installation_status = status"
+                  >
+                    {{ formatStatus(status) }}
+                  </VBtn>
+                </div>
+              </div>
+            </VCol>
+
+            <!-- Remarks -->
+            <VCol cols="12">
+              <AppTextField
+                v-model="updateData.remarks"
+                label="Remarks"
+                placeholder="Add any remarks or notes..."
+                multiline
+                rows="3"
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VCardActions>
+          <VSpacer />
+          <VBtn variant="tonal" @click="closeUpdateDialog">Cancel</VBtn>
+          <VBtn 
+            color="primary" 
+            @click="updateInstallationStatus" 
+            :loading="updating"
+            :disabled="!isStatusChanged"
+          >
+            Update Status
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
   </VContainer>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import installationService from '@/services/installationService'
-// import { states, verificationOptions } from '@/util/states'
 
 const router = useRouter()
 
 // Reactive data
 const loading = ref(false)
+const updating = ref(false)
 const installations = ref({ data: [] })
 const statistics = ref({})
+const statesData = ref([])
 
-// Page size options - starting with 25 as default
+// Status arrays
+const deliveryStatuses = ref(['not delivered', 'in transit', 'delivered', 'partially delivered'])
+const installationStatuses = ref(['not installed', 'in progress', 'installed', 'partially installed'])
+
+// Dialog state
+const showUpdateDialog = ref(false)
+const selectedInstallation = ref(null)
+const updateType = ref('both') // 'delivery', 'installation', or 'both'
+
+// Update form data
+const updateData = ref({
+  delivery_status: '',
+  installation_status: '',
+  remarks: ''
+})
+
+// Page size options
 const pageSizeOptions = ref([
   { title: '10 rows', value: 10 },
   { title: '25 rows', value: 25 },
@@ -395,7 +529,35 @@ const pageSizeOptions = ref([
   { title: 'All', value: 1000 }
 ])
 
-// Filters - default to 25 rows per page
+// Status options for dropdowns
+const deliveryStatusOptions = computed(() => {
+  return deliveryStatuses.value.map(status => ({
+    title: formatStatus(status),
+    value: status
+  }))
+})
+
+const installationStatusOptions = computed(() => {
+  return installationStatuses.value.map(status => ({
+    title: formatStatus(status),
+    value: status
+  }))
+})
+
+const verificationOptions = ref([
+  { title: 'Verified', value: true },
+  { title: 'Not Verified', value: false }
+])
+
+// State options computed from states data
+const stateOptions = computed(() => {
+  return statesData.value.map(state => ({
+    title: state.name,
+    value: state.id
+  }))
+})
+
+// Filters
 const filters = ref({
   search: '',
   state_id: null,
@@ -404,7 +566,20 @@ const filters = ref({
   per_page: 25
 })
 
-// Watch for filter changes and debounce search
+// Check if status has changed
+const isStatusChanged = computed(() => {
+  if (!selectedInstallation.value) return false
+  
+  const deliveryChanged = updateType.value !== 'installation' && 
+    updateData.value.delivery_status !== selectedInstallation.value.delivery_status
+  
+  const installationChanged = updateType.value !== 'delivery' && 
+    updateData.value.installation_status !== selectedInstallation.value.installation_status
+  
+  return deliveryChanged || installationChanged || updateData.value.remarks.trim() !== ''
+})
+
+// Watch for filter changes
 let searchTimeout
 watch(() => filters.value.search, (newSearch) => {
   clearTimeout(searchTimeout)
@@ -416,7 +591,6 @@ watch(() => filters.value.search, (newSearch) => {
   }
 })
 
-// Watch for page size changes
 watch(() => filters.value.per_page, () => {
   filters.value.page = 1
   fetchInstallations()
@@ -448,8 +622,108 @@ const fetchStatistics = async () => {
   }
 }
 
+const fetchStates = async () => {
+  try {
+    const response = await installationService.getStatesWithInstallations()
+    if (response.success) {
+      statesData.value = response.data
+    }
+  } catch (error) {
+    console.error('Error fetching states:', error)
+  }
+}
+
 const goToInstallationDetail = (installationId) => {
   router.push(`/installation/${installationId}`)
+}
+
+const openUpdateDialog = (installation, type = 'both') => {
+  selectedInstallation.value = installation
+  updateType.value = type
+  
+  // Initialize form data
+  updateData.value = {
+    delivery_status: installation.delivery_status || '',
+    installation_status: installation.installation_status || '',
+    remarks: installation.remarks || ''
+  }
+  
+  showUpdateDialog.value = true
+}
+
+const closeUpdateDialog = () => {
+  showUpdateDialog.value = false
+  selectedInstallation.value = null
+  updateData.value = {
+    delivery_status: '',
+    installation_status: '',
+    remarks: ''
+  }
+}
+
+const updateInstallationStatus = async () => {
+  if (!selectedInstallation.value || !isStatusChanged.value) return
+  
+  updating.value = true
+  try {
+    // Use the specific update methods for status changes
+    if (updateType.value !== 'installation' && updateData.value.delivery_status !== selectedInstallation.value.delivery_status) {
+      await installationService.updateDeliveryStatus(selectedInstallation.value.id, updateData.value.delivery_status)
+      selectedInstallation.value.delivery_status = updateData.value.delivery_status
+    }
+    
+    if (updateType.value !== 'delivery' && updateData.value.installation_status !== selectedInstallation.value.installation_status) {
+      await installationService.updateInstallationStatus(selectedInstallation.value.id, updateData.value.installation_status)
+      selectedInstallation.value.installation_status = updateData.value.installation_status
+    }
+    
+    // Update remarks using the general update method if changed
+    if (updateData.value.remarks.trim() !== (selectedInstallation.value.remarks || '')) {
+      await installationService.updateInstallation(selectedInstallation.value.id, {
+        remarks: updateData.value.remarks
+      })
+      selectedInstallation.value.remarks = updateData.value.remarks
+    }
+    
+    // Refresh data
+    fetchInstallations()
+    fetchStatistics()
+    
+    closeUpdateDialog()
+  } catch (error) {
+    console.error('Error updating installation:', error)
+  } finally {
+    updating.value = false
+  }
+}
+
+// Individual status update methods
+const updateDeliveryStatus = async (status) => {
+  if (!selectedInstallation.value) return
+  
+  try {
+    await installationService.updateDeliveryStatus(selectedInstallation.value.id, status)
+    selectedInstallation.value.delivery_status = status
+    // Refresh data
+    fetchInstallations()
+    fetchStatistics()
+  } catch (err) {
+    console.error('Error updating delivery status:', err)
+  }
+}
+
+const updateInstallationStatusIndividual = async (status) => {
+  if (!selectedInstallation.value) return
+  
+  try {
+    await installationService.updateInstallationStatus(selectedInstallation.value.id, status)
+    selectedInstallation.value.installation_status = status
+    // Refresh data
+    fetchInstallations()
+    fetchStatistics()
+  } catch (err) {
+    console.error('Error updating installation status:', err)
+  }
 }
 
 const toggleVerification = async (installation) => {
@@ -508,9 +782,57 @@ const exportData = async () => {
     const response = await installationService.exportInstallations(filters.value)
     if (response.success) {
       console.log('Export data:', response.data)
+      // Handle file download here
     }
   } catch (error) {
     console.error('Error exporting data:', error)
+  }
+}
+
+// Status formatting helpers
+const formatStatus = (status) => {
+  return status ? status.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ') : 'Unknown'
+}
+
+const getDeliveryStatusColor = (status) => {
+  switch (status) {
+    case 'delivered': return 'success'
+    case 'partially delivered': return 'warning'
+    case 'in transit': return 'info'
+    case 'not delivered': return 'error'
+    default: return 'secondary'
+  }
+}
+
+const getInstallationStatusColor = (status) => {
+  switch (status) {
+    case 'installed': return 'success'
+    case 'partially installed': return 'warning'
+    case 'in progress': return 'info'
+    case 'not installed': return 'error'
+    default: return 'secondary'
+  }
+}
+
+const getDeliveryStatusIcon = (status) => {
+  switch (status) {
+    case 'delivered': return 'tabler-check'
+    case 'partially delivered': return 'tabler-package'
+    case 'in transit': return 'tabler-truck-delivery'
+    case 'not delivered': return 'tabler-x'
+    default: return 'tabler-package'
+  }
+}
+
+const getInstallationStatusIcon = (status) => {
+  switch (status) {
+    case 'installed': return 'tabler-check'
+    case 'partially installed': return 'tabler-settings'
+    case 'in progress': return 'tabler-tools'
+    case 'not installed': return 'tabler-x'
+    default: return 'tabler-settings'
   }
 }
 
@@ -518,6 +840,7 @@ const exportData = async () => {
 onMounted(() => {
   fetchInstallations()
   fetchStatistics()
+  fetchStates()
 })
 </script>
 
@@ -537,17 +860,11 @@ onMounted(() => {
 }
 
 .installation-row {
-  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .installation-row:hover {
   background-color: rgba(var(--v-theme-primary), 0.04);
-  transform: translateX(2px);
-}
-
-.installation-row:active {
-  background-color: rgba(var(--v-theme-primary), 0.08);
 }
 
 .border-b {
@@ -556,5 +873,16 @@ onMounted(() => {
 
 .border-t {
   border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.facility-info {
+  border-left: 4px solid rgb(var(--v-theme-primary));
+}
+
+.quick-actions {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(var(--v-theme-surface), 0.5);
 }
 </style>

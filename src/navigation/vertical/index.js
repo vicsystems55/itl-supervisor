@@ -35,7 +35,7 @@ setTimeout(() => {
         icon: { icon: 'tabler-building-warehouse' },
         children: [
           { title: 'Warehouses', to: { name: 'warehouses' } },
-          { title: 'Vehicles & Drivers', to: { name: 'vehicles-drivers' } },
+          // { title: 'Vehicles & Drivers', to: { name: 'vehicles-drivers' } },
         ],
       },
 

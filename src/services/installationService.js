@@ -43,7 +43,7 @@ class InstallationService {
   // Get dashboard summary
   async getDashboardSummary() {
     try {
-      const response = await api.get('/installations/dashboard/summary')
+      const response = await api.get('/installations/statistics')
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to fetch dashboard summary')
@@ -98,7 +98,7 @@ class InstallationService {
     }
   }
 
-  // NEW: Update delivery status
+  // Update delivery status
   async updateDeliveryStatus(id, status) {
     try {
       const response = await api.patch(`/installations/${id}/delivery-status`, { status })
@@ -108,7 +108,7 @@ class InstallationService {
     }
   }
 
-  // NEW: Update installation status
+  // Update installation status
   async updateInstallationStatus(id, status) {
     try {
       const response = await api.patch(`/installations/${id}/installation-status`, { status })
@@ -118,13 +118,32 @@ class InstallationService {
     }
   }
 
-  // NEW: Update installation (general update for multiple fields)
+  // Update installation (general update for multiple fields)
   async updateInstallation(id, data) {
     try {
       const response = await api.put(`/installations/${id}`, data)
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to update installation')
+    }
+  }
+
+  // NEW: Get states with installation details
+  async getStatesWithInstallations(filters = {}) {
+    const params = new URLSearchParams()
+    
+    // Add filters to params
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+        params.append(key, filters[key])
+      }
+    })
+
+    try {
+      const response = await api.get(`/states?${params}`)
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch states with installation data')
     }
   }
 }
