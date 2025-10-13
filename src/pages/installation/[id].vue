@@ -175,45 +175,75 @@
                 <VDivider />
                 <VCardText>
                   <VRow>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Facility Name" :value="installation.facility?.name" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Facility Type" :value="installation.facility?.facility_type" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Facility Code" :value="installation.facility?.code" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Facility Level" :value="installation.facility?.level" />
-                    </VCol>
-                    <VCol cols="12">
-                      <DetailItem label="Address" :value="installation.facility?.address" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Supply Chain Level" :value="installation.facility?.supply_chain_level" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem 
-                        label="Road Access" 
-                        :value="installation.facility?.road_accessible ? 'Yes' : 'No'" 
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem 
-                        label="Distance from Hub" 
-                        :value="installation.facility?.distance_from_hub_km + ' km'" 
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Road Quality" :value="installation.facility?.road_quality" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Phone Number" :value="installation.facility?.phone_number" />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem label="Email" :value="installation.facility?.email" />
-                    </VCol>
+
+                <VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Facility Name</div>
+    <div class="text-body-1">{{ installation.facility?.name || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Facility Type</div>
+    <div class="text-body-1">{{ installation.facility?.facility_type || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Facility Code</div>
+    <div class="text-body-1">{{ installation.facility?.code || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Facility Level</div>
+    <div class="text-body-1">{{ installation.facility?.level || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Address</div>
+    <div class="text-body-1">{{ installation.facility?.address || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Supply Chain Level</div>
+    <div class="text-body-1">{{ installation.facility?.supply_chain_level || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Road Access</div>
+    <div class="text-body-1">{{ installation.facility?.road_accessible ? 'Yes' : 'No' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Distance from Hub</div>
+    <div class="text-body-1">
+      {{ installation.facility?.distance_from_hub_km ? installation.facility.distance_from_hub_km + ' km' : 'Not specified' }}
+    </div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Road Quality</div>
+    <div class="text-body-1">{{ installation.facility?.road_quality || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Phone Number</div>
+    <div class="text-body-1">{{ installation.facility?.phone_number || 'Not specified' }}</div>
+  </div>
+</VCol>
+<VCol cols="12" sm="6">
+  <div class="detail-field">
+    <div class="text-caption text-medium-emphasis">Email</div>
+    <div class="text-body-1">{{ installation.facility?.email || 'Not specified' }}</div>
+  </div>
+</VCol>
                   </VRow>
                 </VCardText>
               </VCard>
