@@ -51,7 +51,7 @@
             </VAvatar>
             <div>
               <div class="text-h6 font-weight-semibold">{{ statistics.verified_installations || 0 }}</div>
-              <div class="text-caption text-medium-emphasis">Verified</div>
+              <div class="text-caption text-medium-emphasis">Installed</div>
             </div>
           </VCardText>
         </VCard>
@@ -69,7 +69,7 @@
             </VAvatar>
             <div>
               <div class="text-h6 font-weight-semibold">{{ statistics.pending_verification || 0 }}</div>
-              <div class="text-caption text-medium-emphasis">Pending Verification</div>
+              <div class="text-caption text-medium-emphasis">Delivered</div>
             </div>
           </VCardText>
         </VCard>

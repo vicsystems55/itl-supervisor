@@ -183,6 +183,9 @@ const handleStateClick = async (event) => {
     if (state?.id) {
       const response = await InstallationService.getByState(state.id)
       selectedStateInstallations.value = response.data || response
+
+      console.log('Loaded installations for', stateName, selectedStateInstallations.value)
+
     } else {
       console.warn('No state ID found for', stateName)
     }
@@ -478,10 +481,11 @@ onUnmounted(() => {
           <div v-else>
             <VList lines="two" class="installation-list">
               <VListItem
-                v-for="install in selectedStateInstallations"
+                v-for="install in selectedStateInstallations.installations.data"
                 :key="install.id"
                 class="installation-item"
               >
+            
                 <VListItemTitle class="facility-name">
                   <strong>{{ install.facility?.name || 'Unknown Facility' }}</strong>
                 </VListItemTitle>

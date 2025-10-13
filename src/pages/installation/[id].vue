@@ -236,7 +236,7 @@
                           <VCard variant="outlined" class="equipment-card">
                             <VCardText>
                               <VImg
-                                :src="`${backendUrl}/images/360wpanel.png`"
+                                :src="`${backendPath}/images/360wpanel.png`"
                                 :alt="'360W Panel'"
                                 max-height="120"
                                 contain
@@ -257,7 +257,7 @@
                           <VCard variant="outlined" class="equipment-card">
                             <VCardText>
                               <VImg
-                                :src="`${backendUrl}/images/htd40.png`"
+                                :src="`${backendPath}/images/htd40.png`"
                                 :alt="'HTD40'"
                                 max-height="120"
                                 contain
@@ -519,6 +519,8 @@ const error = ref(null)
 const installation = ref(null)
 const map = ref(null)
 const backendUrl = import.meta.env.VITE_BACKEND_URL
+const backendPath = import.meta.env.VITE_BACKEND_PATH
+
 
 // Status options
 const deliveryStatuses = ref(['not delivered', 'in transit', 'delivered', 'partially delivered'])
