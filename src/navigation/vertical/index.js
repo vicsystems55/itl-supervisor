@@ -140,8 +140,8 @@ setTimeout(() => {
         icon: { icon: 'tabler-tools' },
         children: [
           { title: 'Installation List', to: { name: 'installation' } },
-          { title: 'Installation Photos', to: { name: 'installation-photos' } },
-          { title: 'Pre-commissioning Reports', to: { name: 'precommissioning-report' } },
+          // { title: 'Installation Photos', to: { name: 'installation-photos' } },
+          // { title: 'Pre-commissioning Reports', to: { name: 'precommissioning-report' } },
         ],
       },
       {
