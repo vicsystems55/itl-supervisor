@@ -77,6 +77,8 @@ setTimeout(() => {
           { title: 'Notifications', to: { name: 'notifications' } },
           { title: 'Authorization', to: { name: 'authorization' } },
           { title: 'Database', to: { name: 'upload-database' } },
+          { title: 'Checklist Management', to: { name: 'checklist-management' } },
+          
         ],
       },
     ]
@@ -172,6 +174,7 @@ setTimeout(() => {
           { title: 'Notifications', to: { name: 'notifications' } },
           { title: 'Authorization', to: { name: 'authorization' } },
           { title: 'Database', to: { name: 'upload-database' } },
+
         ],
       },
     ]

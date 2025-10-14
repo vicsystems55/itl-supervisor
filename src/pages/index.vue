@@ -383,11 +383,13 @@ onMounted(async () => {
   </VRow>
 
   <!-- Activity and Map Overview -->
-  <VRow class="match-height mt-2">
+  <VRow class="match-heigh mt-2">
     <!-- Installation Map -->
-    <VCol cols="12" md="12">
+    <VCol cols="12" md="12"  >
       <!-- Pass the processed installations to the map -->
-      <InstallationMap :installations="processedStatesData" />
+      
+         <InstallationMap :installations="processedStatesData" />
+       
     </VCol>
 
     <!-- Recent Activity -->

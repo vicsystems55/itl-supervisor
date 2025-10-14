@@ -588,7 +588,7 @@ onUnmounted(() => {
 .map-container { 
   position: relative; 
   width: 100%; 
-  height: 60vh; 
+  height: 100vh; 
   min-height: 400px;
   max-height: 600px;
   overflow: hidden; 
@@ -763,8 +763,8 @@ onUnmounted(() => {
   }
   
   .map-container {
-    height: 50vh;
-    min-height: 300px;
+    height: 100vh;
+    min-height: 400px;
   }
   
   .legend-header {

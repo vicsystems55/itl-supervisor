@@ -47,6 +47,8 @@ declare module 'vue' {
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
     InstallationChecklistDialog: typeof import('./src/components/dialogs/InstallationChecklistDialog.vue')['default']
+    InstallationChecklistDisplay: typeof import('./src/components/InstallationChecklistDisplay.vue')['default']
+    InstallationChecklistEditor: typeof import('./src/components/InstallationChecklistEditor.vue')['default']
     InstallationMap: typeof import('./src/components/InstallationMap.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
     Notifications: typeof import('./src/@core/components/Notifications.vue')['default']

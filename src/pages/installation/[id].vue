@@ -1,5 +1,39 @@
 <template>
   <VContainer fluid class="pa-6">
+
+
+      <div>
+    <!-- Your existing installation details -->
+    <VRow class="mb-6">
+      <VCol cols="12">
+        <div class="d-flex justify-space-between align-start">
+          <!-- ... your existing header ... -->
+          
+          <div class="d-flex gap-2">
+           
+          </div>
+        </div>
+      </VCol>
+    </VRow>
+
+    <!-- Checklist Display Dialog -->
+    <InstallationChecklistDisplay
+      v-model="showChecklistDisplay"
+      :installation-id="installation?.id"
+      :facility-name="installation?.facility?.name"
+      @start-editing="handleStartEditing"
+    />
+    
+    <!-- Checklist Editor Dialog -->
+    <InstallationChecklistEditor
+      v-model="showChecklistEditor"
+      :installation-id="installation?.id"
+      :facility-name="installation?.facility?.name"
+      :checklist-data="checklistData"
+      :draft-data="draftData"
+      @submitted="handleChecklistSubmitted"
+    />
+  </div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
       <VProgressCircular indeterminate color="primary" size="64" />
@@ -123,7 +157,7 @@
               </VBtn>
               <VBtn
                 color="primary"
-                @click="showChecklist = true"
+                @click="showChecklistDisplay = true"
                 size="small"
                 class="flex-grow-1 flex-sm-grow-0"
               >
@@ -131,6 +165,8 @@
                 <span class="d-none d-sm-inline">Installation Checklist</span>
                 <span class="d-sm-none">Checklist</span>
               </VBtn>
+
+               
             </div>
           </div>
         </VCol>
@@ -378,15 +414,16 @@
                 <VCardText>
                   <VRow>
                     <!-- Equipment Images -->
-                    <VCol cols="12" class="mb-4">
-                      <div class="d-flex justify-center gap-4 flex-wrap">
+                    <VCol cols="12" class="mb-1">
+                      <div class="d-flex justify-center gap-2 flex-wrap">
                         <div class="text-center">
                           <VCard variant="outlined" class="equipment-card">
                             <VCardText>
                               <VImg
                                 :src="`${backendPath}/images/360wpanel.png`"
                                 :alt="'360W Panel'"
-                                max-height="120"
+                                height="150"
+                                width="200"
                                 contain
                                 class="mb-2"
                               />
@@ -409,7 +446,8 @@
                               <VImg
                                 :src="`${backendPath}/images/htd40.png`"
                                 :alt="'HTD40'"
-                                max-height="120"
+                                height="150"
+                                width="200"
                                 contain
                                 class="mb-2"
                               />
@@ -429,66 +467,122 @@
                       </div>
                     </VCol>
 
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Supplier"
-                        :value="installation.supplier"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Product Model"
-                        :value="installation.product_model"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Quantity Received"
-                        :value="installation.total_quantity_received"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Quantity Delivered"
-                        :value="installation.total_quantity_delivered"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Quantity Installed"
-                        :value="installation.total_quantity_installed"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Country"
-                        :value="installation.country"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Province/State"
-                        :value="installation.province"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="PO Number"
-                        :value="installation.po_number"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="PO Item Number"
-                        :value="installation.po_item_number"
-                      />
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <DetailItem
-                        label="Service Contract Number"
-                        :value="installation.service_contract_number"
-                      />
-                    </VCol>
+                   
+    <!-- Supplier & Product -->
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Supplier
+        </div>
+        <div class="text-body-1">
+          {{ installation.supplier || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Product Model
+        </div>
+        <div class="text-body-1">
+          {{ installation.product_model || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <!-- Quantity Metrics -->
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Quantity Received
+        </div>
+        <div class="text-body-1">
+          {{ installation.total_quantity_received || 0 }}
+        </div>
+      </div>
+    </VCol>
+
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Quantity Delivered
+        </div>
+        <div class="text-body-1">
+          {{ installation.total_quantity_delivered || 0 }}
+        </div>
+      </div>
+    </VCol>
+
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Quantity Installed
+        </div>
+        <div class="text-body-1">
+          {{ installation.total_quantity_installed || 0 }}
+        </div>
+      </div>
+    </VCol>
+
+    <!-- Location -->
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Country
+        </div>
+        <div class="text-body-1">
+          {{ installation.country || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Province/State
+        </div>
+        <div class="text-body-1">
+          {{ installation.province || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <!-- Purchase Order -->
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          PO Number
+        </div>
+        <div class="text-body-1">
+          {{ installation.po_number || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          PO Item Number
+        </div>
+        <div class="text-body-1">
+          {{ installation.po_item_number || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
+    <!-- Service Contract -->
+    <VCol cols="12" sm="6">
+      <div class="detail-field">
+        <div class="text-caption text-medium-emphasis">
+          Service Contract Number
+        </div>
+        <div class="text-body-1">
+          {{ installation.service_contract_number || "Not specified" }}
+        </div>
+      </div>
+    </VCol>
+
                   </VRow>
                 </VCardText>
               </VCard>
@@ -736,13 +830,15 @@
     </div>
   </VContainer>
 
- <!-- Installation Checklist Dialog -->
-  <InstallationChecklistDialog
-    v-model="showChecklist"
-    :installation-id="installation?.id"
-    :facility-name="installation?.facility?.name"
-    @submit="handleChecklistSubmit"
-  />
+     <!-- Checklist Display Dialog -->
+    <InstallationChecklistDisplay
+      v-model="showChecklistDisplay"
+      :installation-id="installation?.id"
+      :facility-name="installation?.facility?.name"
+      @start-editing="handleStartEditing"
+    />
+    
+ 
 </template>
 
 <script setup>
@@ -751,12 +847,22 @@ import { useRoute, useRouter } from "vue-router";
 import installationService from "@/services/installationService";
 import InstallationChecklistDialog from '@/components/dialogs/InstallationChecklistDialog.vue'
 
+import InstallationChecklistDisplay from '@/components/InstallationChecklistDisplay.vue'
+import InstallationChecklistEditor from '@/components/InstallationChecklistEditor.vue'
+
+
+
 
 // Leaflet CSS (import in your main CSS file or here)
 import "leaflet/dist/leaflet.css";
 
 // Import Leaflet
 let L = null;
+
+const showChecklistDisplay = ref(false)
+const showChecklistEditor = ref(false)
+const checklistData = ref(null)
+const draftData = ref(null)
 
 const route = useRoute();
 const router = useRouter();
@@ -791,6 +897,20 @@ const handleChecklistSubmit = (checklistData) => {
   
   // Show success message
   // showSnackbar('Installation checklist submitted successfully!', 'success')
+}
+
+
+
+const handleStartEditing = (data) => {
+  checklistData.value = data.checklist
+  draftData.value = data.draftData
+  showChecklistDisplay.value = false
+  showChecklistEditor.value = true
+}
+
+const handleChecklistSubmitted = (submissionData) => {
+  console.log('Checklist submitted:', submissionData)
+  // Refresh installation data or show success message
 }
 
 

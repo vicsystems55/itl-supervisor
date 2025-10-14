@@ -26,6 +26,7 @@ declare module 'vue-router/auto-routes' {
     'annex-forms': RouteRecordInfo<'annex-forms', '/AnnexForms', Record<never, never>, Record<never, never>>,
     'authorization': RouteRecordInfo<'authorization', '/Authorization', Record<never, never>, Record<never, never>>,
     'caption-generator': RouteRecordInfo<'caption-generator', '/caption-generator', Record<never, never>, Record<never, never>>,
+    'checklist-management': RouteRecordInfo<'checklist-management', '/checklist-management', Record<never, never>, Record<never, never>>,
     'dashboard': RouteRecordInfo<'dashboard', '/dashboard', Record<never, never>, Record<never, never>>,
     'delivery-receipts': RouteRecordInfo<'delivery-receipts', '/DeliveryReceipts', Record<never, never>, Record<never, never>>,
     'installation': RouteRecordInfo<'installation', '/installation', Record<never, never>, Record<never, never>>,
