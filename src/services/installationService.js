@@ -1,6 +1,24 @@
 import api from '@/utils/axios'
 
 class InstallationService {
+
+  // Export ALL installations (not just paginated)
+async exportAllInstallations(filters = {}) {
+  const params = new URLSearchParams()
+  
+  Object.keys(filters).forEach(key => {
+    if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+      params.append(key, filters[key])
+    }
+  })
+
+  try {
+    const response = await api.get(`/installations/export/all?${params}`)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Export failed')
+  }
+}
   // Get all installations with optional filters
   async getInstallations(filters = {}) {
     const params = new URLSearchParams()

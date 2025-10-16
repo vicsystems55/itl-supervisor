@@ -362,6 +362,7 @@
     "whenever": true,
     "axios": true,
     "states": true,
-    "verificationOptions": true
+    "verificationOptions": true,
+    "fontendExport": true
   }
 }

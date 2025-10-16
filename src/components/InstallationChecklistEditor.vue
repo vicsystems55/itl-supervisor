@@ -13,7 +13,7 @@
         </VBtn>
       </VCardTitle>
       
-      <VCardText class="pa-6">
+      <VCardText class="pa-1">
         <VForm ref="form" v-model="formValid">
           <!-- Progress Indicator -->
           <VCard variant="outlined" class="mb-6">

@@ -8,13 +8,13 @@
             <h1 class="text-h4 font-weight-bold text-primary">Installations</h1>
             <p class="text-body-1 text-medium-emphasis">Manage and monitor equipment installations</p>
           </div>
-          <VBtn
-            color="primary"
-            prepend-icon="tabler-download"
-            @click="exportData"
-          >
-            Export Data
-          </VBtn>
+                 <!-- Export ALL data -->
+    <SimpleExportButton
+      :filters="currentFilters"
+      button-text="Export All Data"
+      tooltip="Export ALL installations with current filters"
+      @export-success="handleAllExportSuccess"
+    />
         </div>
       </VCol>
     </VRow>
@@ -494,6 +494,8 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import installationService from '@/services/installationService'
+import SimpleExportButton from '@/components/SimpleExportButton.vue'
+
 
 const router = useRouter()
 
@@ -528,6 +530,11 @@ const pageSizeOptions = ref([
   { title: '100 rows', value: 100 },
   { title: 'All', value: 1000 }
 ])
+
+const handleExportSuccess = (result) => {
+  console.log(`Exported ${result.count} installations successfully`)
+  // Show success message
+}
 
 // Status options for dropdowns
 const deliveryStatusOptions = computed(() => {

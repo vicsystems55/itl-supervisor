@@ -13,7 +13,7 @@
         </VBtn>
       </VCardTitle>
       
-      <VCardText class="pa-6">
+      <VCardText class="pa-1">
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-8">
           <VProgressCircular indeterminate color="primary" size="64" />
@@ -70,7 +70,7 @@
                 <!-- Questions -->
                 <VRow v-for="question in section.questions" :key="question.id" class="mb-4">
                   <VCol cols="12">
-                    <div class="d-flex align-start gap-4">
+                    <div class="d-flex align-start gap-1">
                       <!-- Question Number -->
                       <div class="flex-shrink-0 mt-1">
                         <VChip variant="outlined" size="small" color="primary">

@@ -64,6 +64,7 @@ declare module 'vue' {
     ScrollToTop: typeof import('./src/@core/components/ScrollToTop.vue')['default']
     ShareProjectDialog: typeof import('./src/components/dialogs/ShareProjectDialog.vue')['default']
     Shortcuts: typeof import('./src/@core/components/Shortcuts.vue')['default']
+    SimpleExportButton: typeof import('./src/components/SimpleExportButton.vue')['default']
     SummaryCard: typeof import('./src/components/SummaryCard.vue')['default']
     TablePagination: typeof import('./src/@core/components/TablePagination.vue')['default']
     TechnicianForm: typeof import('./src/components/TechnicianForm.vue')['default']
