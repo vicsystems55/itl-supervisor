@@ -60,7 +60,7 @@ const login = async () => {
       // Redirect based on role (Technician Lead to Technician Dashboard) 
       
       if (userRole === 'Technician Lead') {
-        await router.push({ name: 'technician-dashboard' })
+        await router.push({ to: '/' })
       } else {
         // Redirect to intended page or default dashboard
         const redirect = router.currentRoute.value.query.redirect || '/'

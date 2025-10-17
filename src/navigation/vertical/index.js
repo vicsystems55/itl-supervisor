@@ -96,14 +96,14 @@ setTimeout(() => {
         title: 'Reports',
         icon: { icon: 'tabler-report' },
         children: [
-          { title: 'My Deliveries', to: { path: '/' } },
-          { title: 'My Installations', to: { path: '/' } },
+          // { title: 'My Deliveries', to: { path: '/' } },
+          { title: 'My Installations', to: { name: 'installation' } },
         ],
       },
       {
         title: 'Profile',
         icon: { icon: 'tabler-user' },
-        to: { path: '/' },
+        to: { name: 'technician-profile' },
       },
     ]
   }
