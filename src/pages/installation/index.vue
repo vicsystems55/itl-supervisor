@@ -1,5 +1,5 @@
 <template>
-  <VContainer fluid class="pa-6">
+  <VContainer fluid class="pa-1">
     <!-- Header Section -->
     <VRow class="mb-6">
       <VCol cols="12">
