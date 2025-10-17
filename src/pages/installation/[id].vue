@@ -1,39 +1,35 @@
 <template>
-  <VContainer fluid class="pa-6">
+  <VContainer fluid class="pa-1">
+    <div>
+      <!-- Your existing installation details -->
+      <VRow class="mb-6">
+        <VCol cols="12">
+          <div class="d-flex justify-space-between align-start">
+            <!-- ... your existing header ... -->
 
-
-      <div>
-    <!-- Your existing installation details -->
-    <VRow class="mb-6">
-      <VCol cols="12">
-        <div class="d-flex justify-space-between align-start">
-          <!-- ... your existing header ... -->
-          
-          <div class="d-flex gap-2">
-           
+            <div class="d-flex gap-2"></div>
           </div>
-        </div>
-      </VCol>
-    </VRow>
+        </VCol>
+      </VRow>
 
-    <!-- Checklist Display Dialog -->
-    <InstallationChecklistDisplay
-      v-model="showChecklistDisplay"
-      :installation-id="installation?.id"
-      :facility-name="installation?.facility?.name"
-      @start-editing="handleStartEditing"
-    />
-    
-    <!-- Checklist Editor Dialog -->
-    <InstallationChecklistEditor
-      v-model="showChecklistEditor"
-      :installation-id="installation?.id"
-      :facility-name="installation?.facility?.name"
-      :checklist-data="checklistData"
-      :draft-data="draftData"
-      @submitted="handleChecklistSubmitted"
-    />
-  </div>
+      <!-- Checklist Display Dialog -->
+      <InstallationChecklistDisplay
+        v-model="showChecklistDisplay"
+        :installation-id="installation?.id"
+        :facility-name="installation?.facility?.name"
+        @start-editing="handleStartEditing"
+      />
+
+      <!-- Checklist Editor Dialog -->
+      <InstallationChecklistEditor
+        v-model="showChecklistEditor"
+        :installation-id="installation?.id"
+        :facility-name="installation?.facility?.name"
+        :checklist-data="checklistData"
+        :draft-data="draftData"
+        @submitted="handleChecklistSubmitted"
+      />
+    </div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
       <VProgressCircular indeterminate color="primary" size="64" />
@@ -165,15 +161,13 @@
                 <span class="d-none d-sm-inline">Installation Checklist</span>
                 <span class="d-sm-none">Checklist</span>
               </VBtn>
-
-               
             </div>
           </div>
         </VCol>
       </VRow>
 
       <!-- Status Update Buttons -->
-      <VRow class="mb-6">
+      <VRow class="mb-6 d-none">
         <VCol cols="12" sm="6">
           <VCard>
             <VCardTitle class="d-flex align-center">
@@ -258,147 +252,192 @@
             <!-- Facility Information -->
             <VCol cols="12">
               <VCard class="mb-6">
-                <VCardTitle class="d-flex align-center">
-                  <VIcon icon="tabler-building" class="me-2 text-primary" />
-                  Facility Information
-                </VCardTitle>
-                <VDivider />
+                <VTabs v-model="activeTab" color="primary">
+                  <VTab value="facility">
+                    <VIcon icon="tabler-building" class="me-2" />
+                    Details
+                  </VTab>
+                  <VTab value="media">
+                    <VIcon icon="tabler-photo" class="me-2" />
+                    Media
+                  </VTab>
+                  <VTab value="issues">
+                    <VIcon icon="tabler-alert-triangle" class="me-2" />
+                    Issues
+                  </VTab>
+                </VTabs>
+
                 <VCardText>
-                  <VRow>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Facility Name
-                        </div>
-                        <div class="text-body-1">
-                          {{ installation.facility?.name || "Not specified" }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Facility Type
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.facility_type ||
-                            "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Facility Code
-                        </div>
-                        <div class="text-body-1">
-                          {{ installation.facility?.code || "Not specified" }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Facility Level
-                        </div>
-                        <div class="text-body-1">
-                          {{ installation.facility?.level || "Not specified" }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Address
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.address || "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Supply Chain Level
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.supply_chain_level ||
-                            "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Road Access
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.road_accessible
-                              ? "Yes"
-                              : "No"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Distance from Hub
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.distance_from_hub_km
-                              ? installation.facility.distance_from_hub_km +
-                                " km"
-                              : "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Road Quality
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.road_quality ||
-                            "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Phone Number
-                        </div>
-                        <div class="text-body-1">
-                          {{
-                            installation.facility?.phone_number ||
-                            "Not specified"
-                          }}
-                        </div>
-                      </div>
-                    </VCol>
-                    <VCol cols="12" sm="6">
-                      <div class="detail-field">
-                        <div class="text-caption text-medium-emphasis">
-                          Email
-                        </div>
-                        <div class="text-body-1">
-                          {{ installation.facility?.email || "Not specified" }}
-                        </div>
-                      </div>
-                    </VCol>
-                  </VRow>
+                  <VWindow v-model="activeTab">
+                    <!-- Facility Information Tab -->
+                    <VWindowItem value="facility">
+                      <VRow>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Facility Name
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.name || "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Facility Type
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.facility_type ||
+                                "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Facility Code
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.code || "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Facility Level
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.level || "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Address
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.address ||
+                                "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Supply Chain Level
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.supply_chain_level ||
+                                "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Road Access
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.road_accessible
+                                  ? "Yes"
+                                  : "No"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Distance from Hub
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.distance_from_hub_km
+                                  ? installation.facility.distance_from_hub_km +
+                                    " km"
+                                  : "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Road Quality
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.road_quality ||
+                                "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Phone Number
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.phone_number ||
+                                "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                        <VCol cols="12" sm="6">
+                          <div class="detail-field">
+                            <div class="text-caption text-medium-emphasis">
+                              Email
+                            </div>
+                            <div class="text-body-1">
+                              {{
+                                installation.facility?.email || "Not specified"
+                              }}
+                            </div>
+                          </div>
+                        </VCol>
+                      </VRow>
+                    </VWindowItem>
+
+                   <!-- Media Tab -->
+                  <VWindowItem value="media">
+                    <MediaGallery
+                      :installation-id="installation?.id"
+                      :facility-name="installation?.facility?.name"
+                      @media-added="handleMediaAdded"
+                      @media-deleted="handleMediaDeleted"
+                      @media-downloaded="handleMediaDownloaded"
+                    />
+                  </VWindowItem>
+
+                    <!-- Issues Tab -->
+                 <!-- Issues Tab -->
+                  <VWindowItem value="issues">
+                    <InstallationIssues
+                      :installation-id="installation?.id"
+                      @issue-reported="handleIssueReported"
+                      @issue-resolved="handleIssueResolved"
+                    />
+                  </VWindowItem>
+                  </VWindow>
                 </VCardText>
               </VCard>
             </VCol>
@@ -467,122 +506,123 @@
                       </div>
                     </VCol>
 
-                   
-    <!-- Supplier & Product -->
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Supplier
-        </div>
-        <div class="text-body-1">
-          {{ installation.supplier || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <!-- Supplier & Product -->
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Supplier
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.supplier || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Product Model
-        </div>
-        <div class="text-body-1">
-          {{ installation.product_model || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Product Model
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.product_model || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <!-- Quantity Metrics -->
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Quantity Received
-        </div>
-        <div class="text-body-1">
-          {{ installation.total_quantity_received || 0 }}
-        </div>
-      </div>
-    </VCol>
+                    <!-- Quantity Metrics -->
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Quantity Received
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.total_quantity_received || 0 }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Quantity Delivered
-        </div>
-        <div class="text-body-1">
-          {{ installation.total_quantity_delivered || 0 }}
-        </div>
-      </div>
-    </VCol>
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Quantity Delivered
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.total_quantity_delivered || 0 }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Quantity Installed
-        </div>
-        <div class="text-body-1">
-          {{ installation.total_quantity_installed || 0 }}
-        </div>
-      </div>
-    </VCol>
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Quantity Installed
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.total_quantity_installed || 0 }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <!-- Location -->
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Country
-        </div>
-        <div class="text-body-1">
-          {{ installation.country || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <!-- Location -->
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Country
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.country || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Province/State
-        </div>
-        <div class="text-body-1">
-          {{ installation.province || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Province/State
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.province || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <!-- Purchase Order -->
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          PO Number
-        </div>
-        <div class="text-body-1">
-          {{ installation.po_number || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <!-- Purchase Order -->
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          PO Number
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.po_number || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          PO Item Number
-        </div>
-        <div class="text-body-1">
-          {{ installation.po_item_number || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          PO Item Number
+                        </div>
+                        <div class="text-body-1">
+                          {{ installation.po_item_number || "Not specified" }}
+                        </div>
+                      </div>
+                    </VCol>
 
-    <!-- Service Contract -->
-    <VCol cols="12" sm="6">
-      <div class="detail-field">
-        <div class="text-caption text-medium-emphasis">
-          Service Contract Number
-        </div>
-        <div class="text-body-1">
-          {{ installation.service_contract_number || "Not specified" }}
-        </div>
-      </div>
-    </VCol>
-
+                    <!-- Service Contract -->
+                    <VCol cols="12" sm="6">
+                      <div class="detail-field">
+                        <div class="text-caption text-medium-emphasis">
+                          Service Contract Number
+                        </div>
+                        <div class="text-body-1">
+                          {{
+                            installation.service_contract_number ||
+                            "Not specified"
+                          }}
+                        </div>
+                      </div>
+                    </VCol>
                   </VRow>
                 </VCardText>
               </VCard>
@@ -830,28 +870,25 @@
     </div>
   </VContainer>
 
-     <!-- Checklist Display Dialog -->
-    <InstallationChecklistDisplay
-      v-model="showChecklistDisplay"
-      :installation-id="installation?.id"
-      :facility-name="installation?.facility?.name"
-      @start-editing="handleStartEditing"
-    />
-    
- 
+  <!-- Checklist Display Dialog -->
+  <InstallationChecklistDisplay
+    v-model="showChecklistDisplay"
+    :installation-id="installation?.id"
+    :facility-name="installation?.facility?.name"
+    @start-editing="handleStartEditing"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import installationService from "@/services/installationService";
-import InstallationChecklistDialog from '@/components/dialogs/InstallationChecklistDialog.vue'
+import InstallationChecklistDialog from "@/components/dialogs/InstallationChecklistDialog.vue";
 
-import InstallationChecklistDisplay from '@/components/InstallationChecklistDisplay.vue'
-import InstallationChecklistEditor from '@/components/InstallationChecklistEditor.vue'
+import InstallationChecklistDisplay from "@/components/InstallationChecklistDisplay.vue";
+import InstallationChecklistEditor from "@/components/InstallationChecklistEditor.vue";
 
-
-
+import VueEasyLightbox from "vue-easy-lightbox";
 
 // Leaflet CSS (import in your main CSS file or here)
 import "leaflet/dist/leaflet.css";
@@ -859,10 +896,10 @@ import "leaflet/dist/leaflet.css";
 // Import Leaflet
 let L = null;
 
-const showChecklistDisplay = ref(false)
-const showChecklistEditor = ref(false)
-const checklistData = ref(null)
-const draftData = ref(null)
+const showChecklistDisplay = ref(false);
+const showChecklistEditor = ref(false);
+const checklistData = ref(null);
+const draftData = ref(null);
 
 const route = useRoute();
 const router = useRouter();
@@ -874,45 +911,112 @@ const map = ref(null);
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const backendPath = import.meta.env.VITE_BACKEND_PATH;
 
-
 // Props
 const props = defineProps({
   installation: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
+
+// Lightbox state
+const visible = ref(false);
+const lightboxIndex = ref(0);
+
 
 // Dialog state
-const showChecklist = ref(false)
+const showChecklist = ref(false);
+
+
+// Your existing methods for media and issues
+const handleMediaAdded = () => {
+  console.log('Media added for installation:', installation.value?.id)
+  // Refresh media or show success message
+}
+
+const handleMediaDeleted = (mediaId) => {
+  console.log('Media deleted:', mediaId)
+  // Show confirmation or refresh data
+}
+
+const handleMediaDownloaded = (mediaItem) => {
+  console.log('Media downloaded:', mediaItem)
+  // Track download or show confirmation
+}
+
+const handleIssueReported = () => {
+  console.log('Issue reported for installation:', installation.value?.id)
+  // Refresh issues or show success message
+}
+
+const handleIssueResolved = () => {
+  console.log('Issue resolved')
+  // Refresh issues data
+}
+
 
 // Handle checklist submission
 const handleChecklistSubmit = (checklistData) => {
-  console.log('Checklist submitted for installation:', props.installation.id)
-  console.log('Checklist data:', checklistData)
-  
+  console.log("Checklist submitted for installation:", props.installation.id);
+  console.log("Checklist data:", checklistData);
+
   // Here you would typically make an API call to save the checklist data
   // Example:
   // await api.saveInstallationChecklist(props.installation.id, checklistData)
-  
+
   // Show success message
   // showSnackbar('Installation checklist submitted successfully!', 'success')
-}
+};
+
+// Active tab state
+const activeTab = ref("facility");
+
+
+
+// Methods
+const showGallery = (index) => {
+  lightboxIndex.value = index;
+  visible.value = true;
+};
+
+const handleHide = () => {
+  visible.value = false;
+};
+
+const downloadMedia = (item) => {
+  console.log("Downloading:", item.title);
+};
+
+const deleteMedia = (id) => {
+  const index = mediaItems.value.findIndex((item) => item.id === id);
+  if (index !== -1) {
+    mediaItems.value.splice(index, 1);
+  }
+};
+
+// const formatDate = (dateString) => {
+//   if (!dateString) return ''
+//   return new Date(dateString).toLocaleDateString('en-US', {
+//     year: 'numeric',
+//     month: 'long',
+//     day: 'numeric'
+//   })
+// }
+
 
 
 
 const handleStartEditing = (data) => {
-  checklistData.value = data.checklist
-  draftData.value = data.draftData
-  showChecklistDisplay.value = false
-  showChecklistEditor.value = true
-}
+  checklistData.value = data.checklist;
+  draftData.value = data.draftData;
+  showChecklistDisplay.value = false;
+  showChecklistEditor.value = true;
+};
 
 const handleChecklistSubmitted = (submissionData) => {
-  console.log('Checklist submitted:', submissionData)
+  console.log("Checklist submitted:", submissionData);
   // Refresh installation data or show success message
-}
-
+};
 
 // Status options
 const deliveryStatuses = ref([
@@ -932,8 +1036,6 @@ const installationStatuses = ref([
 const hasLocation = computed(() => {
   return installation.value?.lat && installation.value?.lng;
 });
-
-
 
 // Status color mapping
 const getStatusColor = (status) => {
@@ -1131,9 +1233,6 @@ const toggleVerification = async () => {
   }
 };
 
-const editInstallation = () => {
-  console.log("Edit installation:", installation.value.id);
-};
 
 const addLgaOfficer = () => {
   console.log("Add LGA Officer for installation:", installation.value.id);
@@ -1246,20 +1345,16 @@ onMounted(() => {
 :deep(.map-popup strong) {
   color: #424242;
 }
+
+.media-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.media-card:hover {
+  transform: translateY(-4px);
+}
+
+
 </style>
 
-<!-- DetailItem Component -->
-<script>
-const DetailItem = {
-  props: {
-    label: String,
-    value: [String, Number],
-  },
-  template: `
-    <div class="detail-item mb-3">
-      <div class="text-caption text-medium-emphasis">{{ label }}</div>
-      <div class="text-body-1 font-weight-medium">{{ value || 'Not specified' }}</div>
-    </div>
-  `,
-};
-</script>
+
