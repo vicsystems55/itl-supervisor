@@ -90,7 +90,7 @@ setTimeout(() => {
       {
         title: 'Home',
         icon: { icon: 'tabler-home' },
-        to: { name: 'technician-dashboard' },
+        to: { path: '/' },
       },
       {
         title: 'Reports',
