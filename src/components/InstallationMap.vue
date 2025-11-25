@@ -91,7 +91,7 @@ const stateSummaries = computed(() => {
         status = 'fully-completed'
       } else if (delivered === totalInstallations && installed < totalInstallations) {
         status = 'delivered-not-installed'
-      } else if (delivered > 0 && installed > 0) {
+      } else if (installed > 0) {
         status = 'partial-progress'
       } else if (delivered === 0 && installed === 0) {
         status = 'no-progress'
