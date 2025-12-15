@@ -55,13 +55,26 @@ const filteredInstallations = computed(() => {
   let list = allInstallations.value || [];
   const q = (tableFilters.value.search || "").toString().toLowerCase().trim();
   if (tableFilters.value.state) {
-    const target = (tableFilters.value.state || "").toString().toLowerCase().trim();
-    list = list.filter(inst => ((inst.facility?.state?.name || inst.state || "").toString().toLowerCase().trim()) === target);
+    const target = (tableFilters.value.state || "")
+      .toString()
+      .toLowerCase()
+      .trim();
+    list = list.filter(
+      (inst) =>
+        (inst.facility?.state?.name || inst.state || "")
+          .toString()
+          .toLowerCase()
+          .trim() === target
+    );
   }
   if (q) {
-    list = list.filter(inst => {
-      const site = (inst.facility?.name || inst.site_name || inst.name || "").toString().toLowerCase();
-      const lcco = (lccoMap.value[inst.id]?.lcco_name || "").toString().toLowerCase();
+    list = list.filter((inst) => {
+      const site = (inst.facility?.name || inst.site_name || inst.name || "")
+        .toString()
+        .toLowerCase();
+      const lcco = (lccoMap.value[inst.id]?.lcco_name || "")
+        .toString()
+        .toLowerCase();
       return site.includes(q) || lcco.includes(q);
     });
   }
@@ -78,17 +91,23 @@ const paginatedInstallations = computed(() => {
 
 const tableLastPage = computed(() => {
   const per = Number(tableFilters.value.per_page) || 10;
-  return Math.max(1, Math.ceil((filteredInstallations.value || []).length / per));
+  return Math.max(
+    1,
+    Math.ceil((filteredInstallations.value || []).length / per)
+  );
 });
 
 // debounce search
 let searchTimeout;
-watch(() => tableFilters.value.search, (newVal) => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    tableFilters.value.page = 1;
-  }, 300);
-});
+watch(
+  () => tableFilters.value.search,
+  (newVal) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      tableFilters.value.page = 1;
+    }, 300);
+  }
+);
 
 onMounted(async () => {
   await fetchAllInstallations();
@@ -233,14 +252,14 @@ const submitLcco = async () => {
   // Basic client validation
   // Ensure form.installation_id is synced with selected installation
   if (!form.value.installation_id && selectedInstallationId.value) {
-    form.value.installation_id = selectedInstallationId.value
+    form.value.installation_id = selectedInstallationId.value;
   }
 
   // Basic client validation
   if (!form.value.installation_id) {
     errors.value.installation_id = ["Installation is required"];
     message.value = "Please select a site before updating.";
-    console.warn('submitLcco validation failed: missing installation_id')
+    console.warn("submitLcco validation failed: missing installation_id");
     return;
   }
   if (!form.value.lcco_name || form.value.lcco_name.trim() === "") {
@@ -249,7 +268,10 @@ const submitLcco = async () => {
   }
 
   isLoading.value = true;
-  console.log('submitLcco: submitting', { installation_id: form.value.installation_id, lcco_name: form.value.lcco_name })
+  console.log("submitLcco: submitting", {
+    installation_id: form.value.installation_id,
+    lcco_name: form.value.lcco_name,
+  });
   try {
     const payload = { ...form.value };
     const res = await lccoService.create(payload);
@@ -276,7 +298,7 @@ const submitLcco = async () => {
     if (err && err.errors) {
       errors.value = err.errors;
       message.value = "Validation failed. Please correct the fields.";
-      console.warn('submitLcco validation errors', err.errors)
+      console.warn("submitLcco validation errors", err.errors);
     } else {
       console.error("Error saving LCCO:", err);
       message.value = err?.message || "Error saving LCCO.";
@@ -301,7 +323,11 @@ const submitLcco = async () => {
                 placeholder="Search installations or LCCO..."
                 prepend-inner-icon="tabler-search"
                 clearable
-                @click:clear="() => { tableFilters.value.search = '' }"
+                @click:clear="
+                  () => {
+                    tableFilters.value.search = '';
+                  }
+                "
               />
             </VCol>
 
@@ -319,13 +345,25 @@ const submitLcco = async () => {
             <VCol cols="12" sm="6" md="2">
               <AppSelect
                 v-model="tableFilters.per_page"
-                :items="[10,25,50,100]"
+                :items="[10, 25, 50, 100]"
                 label="Items per page"
               />
             </VCol>
 
             <VCol cols="12" sm="6" md="2" class="d-flex align-center">
-              <VBtn variant="tonal" @click="() => { tableFilters.value = { search: '', state: null, per_page: 10, page: 1 } }">
+              <VBtn
+                variant="tonal"
+                @click="
+                  () => {
+                    tableFilters.value = {
+                      search: '',
+                      state: null,
+                      per_page: 10,
+                      page: 1,
+                    };
+                  }
+                "
+              >
                 Clear
               </VBtn>
             </VCol>
@@ -465,7 +503,7 @@ const submitLcco = async () => {
                 <th class="text-left">LCCO Contact</th>
                 <th class="text-left">Serial</th>
                 <th class="text-left">Tag</th>
-                <th class="text-left">Account Status</th>
+                <!-- <th class="text-left">Account Status</th> -->
                 <th class="text-left">Submitted</th>
               </tr>
             </thead>
@@ -528,7 +566,7 @@ const submitLcco = async () => {
                     "-"
                   }}
                 </td>
-                <td>{{ lccoMap[inst.id]?.payment_status ?? "-" }}</td>
+                <!-- <td>{{ lccoMap[inst.id]?.payment_status ?? "-" }}</td> -->
                 <td>
                   <VChip
                     v-if="lccoMap[inst.id]"
