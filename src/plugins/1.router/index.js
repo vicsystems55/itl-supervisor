@@ -12,7 +12,7 @@ const router = createRouter({
 })
 
 // Public routes - no authentication required
-const publicRoutes = ['login', 'register', 'forgot-password']
+const publicRoutes = ['login', 'register', 'forgot-password', 'lcco-details']
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()

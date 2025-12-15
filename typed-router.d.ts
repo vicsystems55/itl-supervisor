@@ -37,6 +37,7 @@ declare module 'vue-router/auto-routes' {
     'interview-scheduler': RouteRecordInfo<'interview-scheduler', '/interview-scheduler', Record<never, never>, Record<never, never>>,
     'invoice-history': RouteRecordInfo<'invoice-history', '/invoice-history', Record<never, never>, Record<never, never>>,
     'invoices-history': RouteRecordInfo<'invoices-history', '/invoices-history', Record<never, never>, Record<never, never>>,
+    'lcco-details': RouteRecordInfo<'lcco-details', '/lcco-details', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'manage-accounts': RouteRecordInfo<'manage-accounts', '/manage-accounts', Record<never, never>, Record<never, never>>,
     'messages': RouteRecordInfo<'messages', '/messages', Record<never, never>, Record<never, never>>,

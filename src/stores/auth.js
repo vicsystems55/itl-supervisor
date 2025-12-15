@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
   // Initialize from localStorage to persist on refresh
@@ -111,20 +111,20 @@ const login = async (credentials) => {
     
     if (storedToken) {
       token.value = storedToken
-      console.log('Auth token restored from storage')
+      if (import.meta.env.DEV) console.debug('Auth token restored from storage')
     }
     
     if (storedUser) {
       try {
         user.value = JSON.parse(storedUser)
-        console.log('User data restored from storage')
+        if (import.meta.env.DEV) console.debug('User data restored from storage')
       } catch (e) {
         console.error('Error parsing stored user data:', e)
         user.value = null
       }
     }
     
-    console.log('Auth initialization complete. Authenticated:', !!token.value)
+    if (import.meta.env.DEV) console.debug('Auth initialization complete. Authenticated:', !!token.value)
   }
 
   // Get current user
