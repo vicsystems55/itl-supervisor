@@ -6,14 +6,23 @@
         <div class="d-flex justify-space-between align-center">
           <div>
             <h1 class="text-h4 font-weight-bold text-primary">Installations</h1>
-            <p class="text-body-1 text-medium-emphasis">Manage and monitor equipment installations</p>
+            <p class="text-body-1 text-medium-emphasis">
+              Manage and monitor equipment installations
+            </p>
           </div>
-          <VBtn
-            color="primary"
-            prepend-icon="tabler-plus"
-            @click="exportData"
-          >
+          <VBtn color="primary" prepend-icon="tabler-plus" @click="exportData">
             Export Data
+          </VBtn>
+
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            class="ms-3"
+            @click="exportLccoDetails"
+            :loading="isExportingLcco"
+          >
+            <VIcon icon="tabler-file-export" class="me-2" />
+            Export LCCO Details
           </VBtn>
         </div>
       </VCol>
@@ -24,16 +33,16 @@
       <VCol cols="12" sm="6" md="3">
         <VCard class="stat-card">
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="primary"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="primary" variant="tonal" class="me-4">
               <VIcon icon="tabler-package" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.total_installations || 0 }}</div>
-              <div class="text-caption text-medium-emphasis">Total Installations</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.total_installations || 0 }}
+              </div>
+              <div class="text-caption text-medium-emphasis">
+                Total Installations
+              </div>
             </div>
           </VCardText>
         </VCard>
@@ -42,15 +51,13 @@
       <VCol cols="12" sm="6" md="3">
         <VCard class="stat-card">
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="success"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="success" variant="tonal" class="me-4">
               <VIcon icon="tabler-check" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.verified_installations || 0 }}</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.verified_installations || 0 }}
+              </div>
               <div class="text-caption text-medium-emphasis">Verified</div>
             </div>
           </VCardText>
@@ -60,16 +67,16 @@
       <VCol cols="12" sm="6" md="3">
         <VCard class="stat-card">
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="warning"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="warning" variant="tonal" class="me-4">
               <VIcon icon="tabler-clock" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.pending_verification || 0 }}</div>
-              <div class="text-caption text-medium-emphasis">Pending Verification</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.pending_verification || 0 }}
+              </div>
+              <div class="text-caption text-medium-emphasis">
+                Pending Verification
+              </div>
             </div>
           </VCardText>
         </VCard>
@@ -78,15 +85,13 @@
       <VCol cols="12" sm="6" md="3">
         <VCard class="stat-card">
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="info"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="info" variant="tonal" class="me-4">
               <VIcon icon="tabler-calendar" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.installations_this_month || 0 }}</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.installations_this_month || 0 }}
+              </div>
               <div class="text-caption text-medium-emphasis">This Month</div>
             </div>
           </VCardText>
@@ -148,10 +153,7 @@
               Apply Filters
             </VBtn>
 
-            <VBtn
-              variant="tonal"
-              @click="clearFilters"
-            >
+            <VBtn variant="tonal" @click="clearFilters">
               <VIcon icon="tabler-rotate-2" class="me-2" />
               Clear Filters
             </VBtn>
@@ -169,7 +171,7 @@
               <th class="text-left">Facility</th>
               <th class="text-left">State</th>
               <th class="text-left">LGA</th>
-             
+
               <th class="text-left">State CCO</th>
               <th class="text-left">Status</th>
               <th class="text-left">Actions</th>
@@ -178,18 +180,21 @@
           <tbody>
             <tr v-if="loading">
               <td colspan="8" class="text-center py-8">
-                <VProgressCircular
-                  indeterminate
-                  color="primary"
-                />
+                <VProgressCircular indeterminate color="primary" />
                 <div class="text-body-2 mt-2">Loading installations...</div>
               </td>
             </tr>
 
             <tr v-else-if="installations.data.length === 0">
               <td colspan="8" class="text-center py-8">
-                <VIcon icon="tabler-package-off" size="48" class="text-medium-emphasis mb-2" />
-                <div class="text-body-1 text-medium-emphasis">No installations found</div>
+                <VIcon
+                  icon="tabler-package-off"
+                  size="48"
+                  class="text-medium-emphasis mb-2"
+                />
+                <div class="text-body-1 text-medium-emphasis">
+                  No installations found
+                </div>
               </td>
             </tr>
 
@@ -210,7 +215,9 @@
                     <VIcon icon="tabler-building" />
                   </VAvatar>
                   <div>
-                    <div class="font-weight-medium">{{ installation.facility?.name }}</div>
+                    <div class="font-weight-medium">
+                      {{ installation.facility?.name }}
+                    </div>
                     <div class="text-caption text-medium-emphasis">
                       {{ installation.facility?.address }}
                     </div>
@@ -228,12 +235,16 @@
                 </VChip>
               </td>
               <td>
-                <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
+                <span class="text-body-2">{{
+                  installation.facility?.lga?.name
+                }}</span>
               </td>
-             
-              
+
               <td>
-                <div v-if="installation.health_officer" class="d-flex align-center">
+                <div
+                  v-if="installation.health_officer"
+                  class="d-flex align-center"
+                >
                   <VAvatar
                     size="28"
                     color="secondary"
@@ -242,22 +253,38 @@
                   >
                     <VIcon icon="tabler-user" size="16" />
                   </VAvatar>
-                  <span class="text-body-2">{{ installation.health_officer.name }}</span>
+                  <span class="text-body-2">{{
+                    installation.health_officer.name
+                  }}</span>
                 </div>
-                <span v-else class="text-caption text-medium-emphasis">Not assigned</span>
+                <span v-else class="text-caption text-medium-emphasis"
+                  >Not assigned</span
+                >
               </td>
               <td>
                 <VChip
-                  :color="installation.verified_by_health_officer ? 'success' : 'warning'"
+                  :color="
+                    installation.verified_by_health_officer
+                      ? 'success'
+                      : 'warning'
+                  "
                   variant="flat"
                   size="small"
                 >
                   <VIcon
-                    :icon="installation.verified_by_health_officer ? 'tabler-check' : 'tabler-clock'"
+                    :icon="
+                      installation.verified_by_health_officer
+                        ? 'tabler-check'
+                        : 'tabler-clock'
+                    "
                     class="me-1"
                     size="16"
                   />
-                  {{ installation.verified_by_health_officer ? 'Verified' : 'Pending' }}
+                  {{
+                    installation.verified_by_health_officer
+                      ? "Verified"
+                      : "Pending"
+                  }}
                 </VChip>
               </td>
               <td>
@@ -270,22 +297,36 @@
                     @click="viewInstallation(installation)"
                   >
                     <VIcon icon="tabler-eye" size="20" />
-                    <VTooltip activator="parent" location="top">View Details</VTooltip>
+                    <VTooltip activator="parent" location="top"
+                      >View Details</VTooltip
+                    >
                   </VBtn>
 
                   <VBtn
                     icon
                     variant="text"
                     size="small"
-                    :color="installation.verified_by_health_officer ? 'warning' : 'success'"
+                    :color="
+                      installation.verified_by_health_officer
+                        ? 'warning'
+                        : 'success'
+                    "
                     @click="toggleVerification(installation)"
                   >
                     <VIcon
-                      :icon="installation.verified_by_health_officer ? 'tabler-x' : 'tabler-check'"
+                      :icon="
+                        installation.verified_by_health_officer
+                          ? 'tabler-x'
+                          : 'tabler-check'
+                      "
                       size="20"
                     />
                     <VTooltip activator="parent" location="top">
-                      {{ installation.verified_by_health_officer ? 'Unverify' : 'Verify' }}
+                      {{
+                        installation.verified_by_health_officer
+                          ? "Unverify"
+                          : "Verify"
+                      }}
                     </VTooltip>
                   </VBtn>
                 </div>
@@ -309,18 +350,11 @@
     </VCard>
 
     <!-- Installation Details Dialog -->
-    <VDialog
-      v-model="showDetailsDialog"
-      max-width="600"
-    >
+    <VDialog v-model="showDetailsDialog" max-width="600">
       <VCard v-if="selectedInstallation">
         <VCardTitle class="d-flex justify-space-between align-center">
           <span>Installation Details</span>
-          <VBtn
-            icon
-            variant="text"
-            @click="showDetailsDialog = false"
-          >
+          <VBtn icon variant="text" @click="showDetailsDialog = false">
             <VIcon icon="tabler-x" />
           </VBtn>
         </VCardTitle>
@@ -329,7 +363,9 @@
           <VRow>
             <VCol cols="12" sm="6">
               <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">Facility</label>
+                <label class="text-caption text-medium-emphasis"
+                  >Facility</label
+                >
                 <div class="text-body-1 font-weight-medium">
                   {{ selectedInstallation.facility?.name }}
                 </div>
@@ -337,41 +373,66 @@
             </VCol>
             <VCol cols="12" sm="6">
               <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">State/LGA</label>
+                <label class="text-caption text-medium-emphasis"
+                  >State/LGA</label
+                >
                 <div class="text-body-1">
-                  {{ selectedInstallation.facility?.state?.name }} / {{ selectedInstallation.facility?.lga?.name }}
+                  {{ selectedInstallation.facility?.state?.name }} /
+                  {{ selectedInstallation.facility?.lga?.name }}
                 </div>
               </div>
             </VCol>
             <VCol cols="12" sm="6">
               <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">Supplier</label>
-                <div class="text-body-1">{{ selectedInstallation.supplier }}</div>
-              </div>
-            </VCol>
-            <VCol cols="12" sm="6">
-              <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">Product Model</label>
-                <div class="text-body-1">{{ selectedInstallation.product_model }}</div>
-              </div>
-            </VCol>
-            <VCol cols="12" sm="6">
-              <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">Health Officer</label>
+                <label class="text-caption text-medium-emphasis"
+                  >Supplier</label
+                >
                 <div class="text-body-1">
-                  {{ selectedInstallation.health_officer?.name || 'Not assigned' }}
+                  {{ selectedInstallation.supplier }}
                 </div>
               </div>
             </VCol>
             <VCol cols="12" sm="6">
               <div class="detail-item">
-                <label class="text-caption text-medium-emphasis">Verification Status</label>
+                <label class="text-caption text-medium-emphasis"
+                  >Product Model</label
+                >
+                <div class="text-body-1">
+                  {{ selectedInstallation.product_model }}
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis"
+                  >Health Officer</label
+                >
+                <div class="text-body-1">
+                  {{
+                    selectedInstallation.health_officer?.name || "Not assigned"
+                  }}
+                </div>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <div class="detail-item">
+                <label class="text-caption text-medium-emphasis"
+                  >Verification Status</label
+                >
                 <div>
                   <VChip
-                    :color="selectedInstallation.verified_by_health_officer ? 'success' : 'warning'"
+                    :color="
+                      selectedInstallation.verified_by_health_officer
+                        ? 'success'
+                        : 'warning'
+                    "
                     size="small"
                   >
-                    {{ selectedInstallation.verified_by_health_officer ? 'Verified' : 'Pending' }}
+                    {{
+                      selectedInstallation.verified_by_health_officer
+                        ? "Verified"
+                        : "Pending"
+                    }}
                   </VChip>
                 </div>
               </div>
@@ -379,7 +440,9 @@
             <VCol cols="12" v-if="selectedInstallation.remarks">
               <div class="detail-item">
                 <label class="text-caption text-medium-emphasis">Remarks</label>
-                <div class="text-body-1">{{ selectedInstallation.remarks }}</div>
+                <div class="text-body-1">
+                  {{ selectedInstallation.remarks }}
+                </div>
               </div>
             </VCol>
           </VRow>
@@ -390,136 +453,196 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import installationService from '@/services/installationService'
-import { states, verificationOptions } from '@/utils/states'
+import installationService from "@/services/installationService";
+import lccoService from "@/services/lccoService";
+import frontendExport from "@/utils/fontendExport";
+import { states, verificationOptions } from "@/utils/states";
+import { onMounted, ref, watch } from "vue";
 
 // Reactive data
-const loading = ref(false)
-const installations = ref({ data: [] })
-const statistics = ref({})
-const showDetailsDialog = ref(false)
-const selectedInstallation = ref(null)
+const loading = ref(false);
+const installations = ref({ data: [] });
+const statistics = ref({});
+const showDetailsDialog = ref(false);
+const selectedInstallation = ref(null);
+const isExportingLcco = ref(false);
 
 // Filters
 const filters = ref({
-  search: '',
+  search: "",
   state_id: null,
   verified: null,
   page: 1,
-  per_page: 10
-})
+  per_page: 10,
+});
 
 // Watch for filter changes and debounce search
-let searchTimeout
-watch(() => filters.value.search, (newSearch) => {
-  clearTimeout(searchTimeout)
-  if (newSearch !== null) {
-    searchTimeout = setTimeout(() => {
-      filters.value.page = 1
-      fetchInstallations()
-    }, 500)
+let searchTimeout;
+watch(
+  () => filters.value.search,
+  (newSearch) => {
+    clearTimeout(searchTimeout);
+    if (newSearch !== null) {
+      searchTimeout = setTimeout(() => {
+        filters.value.page = 1;
+        fetchInstallations();
+      }, 500);
+    }
   }
-})
+);
 
 // Methods
 const fetchInstallations = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await installationService.getInstallations(filters.value)
+    const response = await installationService.getInstallations(filters.value);
     if (response.success) {
-      installations.value = response.data
+      installations.value = response.data;
     }
   } catch (error) {
-    console.error('Error fetching installations:', error)
+    console.error("Error fetching installations:", error);
     // You can add a toast notification here
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const fetchStatistics = async () => {
   try {
-    const response = await installationService.getDashboardSummary()
+    const response = await installationService.getDashboardSummary();
     if (response.success) {
-      statistics.value = response.data
+      statistics.value = response.data;
     }
   } catch (error) {
-    console.error('Error fetching statistics:', error)
+    console.error("Error fetching statistics:", error);
   }
-}
+};
 
 const viewInstallation = (installation) => {
-  selectedInstallation.value = installation
-  showDetailsDialog.value = true
-}
+  selectedInstallation.value = installation;
+  showDetailsDialog.value = true;
+};
 
 const toggleVerification = async (installation) => {
   try {
-    const newStatus = !installation.verified_by_health_officer
-    await installationService.updateVerification(installation.id, newStatus)
-    
+    const newStatus = !installation.verified_by_health_officer;
+    await installationService.updateVerification(installation.id, newStatus);
+
     // Update local state
-    installation.verified_by_health_officer = newStatus
-    
+    installation.verified_by_health_officer = newStatus;
+
     // You can add a success toast here
-    console.log(`Installation ${newStatus ? 'verified' : 'unverified'} successfully`)
+    console.log(
+      `Installation ${newStatus ? "verified" : "unverified"} successfully`
+    );
   } catch (error) {
-    console.error('Error updating verification:', error)
+    console.error("Error updating verification:", error);
     // You can add an error toast here
   }
-}
+};
 
 const clearFilters = () => {
   filters.value = {
-    search: '',
+    search: "",
     state_id: null,
     verified: null,
     page: 1,
-    per_page: 10
-  }
-  fetchInstallations()
-}
+    per_page: 10,
+  };
+  fetchInstallations();
+};
 
 const clearSearch = () => {
-  filters.value.search = ''
-  fetchInstallations()
-}
+  filters.value.search = "";
+  fetchInstallations();
+};
 
 const exportData = async () => {
   try {
-    const response = await installationService.exportInstallations(filters.value)
+    const response = await installationService.exportInstallations(
+      filters.value
+    );
     if (response.success) {
       // You can implement download logic here
-      console.log('Export data:', response.data)
+      console.log("Export data:", response.data);
       // Add toast notification for success
     }
   } catch (error) {
-    console.error('Error exporting data:', error)
+    console.error("Error exporting data:", error);
     // Add toast notification for error
   }
-}
+};
+
+const exportLccoDetails = async () => {
+  isExportingLcco.value = true;
+  try {
+    // fetch LCCO records
+    const lccoRes = await lccoService.index();
+    let lccoData = [];
+    if (lccoRes && lccoRes.success && Array.isArray(lccoRes.data))
+      lccoData = lccoRes.data;
+    else if (
+      lccoRes &&
+      lccoRes.success &&
+      lccoRes.data &&
+      Array.isArray(lccoRes.data.data)
+    )
+      lccoData = lccoRes.data.data;
+
+    if (!lccoData || lccoData.length === 0) {
+      console.info("No LCCO records to export");
+      return;
+    }
+
+    // fetch all installations to build map
+    const instRes = await installationService.exportAllInstallations(
+      filters.value
+    );
+    let allInst = [];
+    if (instRes && instRes.success && Array.isArray(instRes.data))
+      allInst = instRes.data;
+    else if (
+      instRes &&
+      instRes.success &&
+      instRes.data &&
+      Array.isArray(instRes.data.data)
+    )
+      allInst = instRes.data.data;
+
+    const instMap = {};
+    allInst.forEach((i) => {
+      if (i && i.id) instMap[i.id] = i;
+    });
+
+    frontendExport.exportLccoDetails(lccoData, instMap);
+    console.log(`Exported ${lccoData.length} LCCO records`);
+  } catch (err) {
+    console.error("Failed to export LCCO details", err);
+  } finally {
+    isExportingLcco.value = false;
+  }
+};
 
 // Lifecycle
 onMounted(() => {
-  fetchInstallations()
-  fetchStatistics()
-})
+  fetchInstallations();
+  fetchStatistics();
+});
 </script>
 
 <style scoped>
 .stat-card {
-  transition: all 0.3s ease;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 10%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .installation-table {
-  width: 100%;
+  inline-size: 100%;
 }
 
 .installation-row:hover {
@@ -527,11 +650,11 @@ onMounted(() => {
 }
 
 .detail-item {
-  margin-bottom: 16px;
+  margin-block-end: 16px;
 }
 
 .detail-item label {
   display: block;
-  margin-bottom: 4px;
+  margin-block-end: 4px;
 }
 </style>

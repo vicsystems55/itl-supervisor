@@ -304,6 +304,45 @@ class FrontendExportService {
 
     return exportData.length
   }
+
+  /**
+   * Export LCCO details with contact and bank/account fields
+   * @param {Array} lccos - Array of LCCO records
+   * @param {Object} installationMap - Map of installation_id => installation object (optional)
+   * @param {string} filename
+   */
+  exportLccoDetails(lccos, installationMap = {}, filename = null) {
+    if (!lccos || lccos.length === 0) {
+      throw new Error('No LCCO records to export')
+    }
+
+    const exportData = lccos.map((r, index) => {
+      const inst = installationMap && installationMap[r.installation_id] ? installationMap[r.installation_id] : null
+      return {
+        'S/N': index + 1,
+        'Installation ID': r.installation_id || (r.installation ? r.installation.id : 'N/A'),
+        'Facility Name': inst?.facility?.name || (r.installation?.facility?.name) || 'N/A',
+        'LCCO Name': r.lcco_name || r.name || 'N/A',
+        'LCCO Phone': r.lcco_phone || r.phone || 'N/A',
+        'Bank Name': r.lcco_bank_name || r.bank_name || 'N/A',
+        'Account Number': r.lcco_account_number || r.account_number || 'N/A',
+        'Account Name': r.lcco_account_name || r.account_name || 'N/A',
+        'Device Serial': r.device_serial_number || r.serial_number || 'N/A',
+        'Device Tag': r.device_tag_code || r.tag_code || 'N/A',
+        'Created At': r.created_at ? new Date(r.created_at).toLocaleString() : (r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A')
+      }
+    })
+
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    this.autoFitColumns(ws, exportData)
+    XLSX.utils.book_append_sheet(wb, ws, 'LCCO Details')
+
+    const exportFilename = filename || `lcco_details_export_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, exportFilename)
+
+    return exportData.length
+  }
 }
 
 export default new FrontendExportService()

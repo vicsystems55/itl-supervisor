@@ -6,51 +6,71 @@
         <div class="d-flex justify-space-between align-center">
           <div>
             <h1 class="text-h4 font-weight-bold text-primary">Installations</h1>
-            <p class="text-body-1 text-medium-emphasis">Manage and monitor equipment installations</p>
+            <p class="text-body-1 text-medium-emphasis">
+              Manage and monitor equipment installations
+            </p>
           </div>
-                 <!-- Export ALL data -->
-    <SimpleExportButton
-      :filters="currentFilters"
-      button-text="Export All Data"
-      tooltip="Export ALL installations with current filters"
-      @export-success="handleAllExportSuccess"
-    />
+          <!-- Export ALL data -->
+          <SimpleExportButton
+            :filters="currentFilters"
+            button-text="Export All Data"
+            tooltip="Export ALL installations with current filters"
+            @export-success="handleAllExportSuccess"
+          />
         </div>
       </VCol>
     </VRow>
 
+    <!-- Export LCCO Details button -->
+    <VBtn
+      color="secondary"
+      variant="tonal"
+      class="ms-3"
+      @click="exportLccoDetails"
+      :loading="isExportingLcco"
+    >
+      <VIcon icon="tabler-file-export" class="me-2" />
+      Export LCCO Details
+    </VBtn>
+
     <!-- Statistics Cards -->
     <VRow class="mb-6">
       <VCol cols="12" sm="6" md="3">
-        <VCard class="stat-card" @click="filterByStatus(null)" style="cursor: pointer;">
+        <VCard
+          class="stat-card"
+          @click="filterByStatus(null)"
+          style="cursor: pointer"
+        >
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="primary"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="primary" variant="tonal" class="me-4">
               <VIcon icon="tabler-package" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.total_installations || 0 }}</div>
-              <div class="text-caption text-medium-emphasis">Total Installations</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.total_installations || 0 }}
+              </div>
+              <div class="text-caption text-medium-emphasis">
+                Total Installations
+              </div>
             </div>
           </VCardText>
         </VCard>
       </VCol>
 
       <VCol cols="12" sm="6" md="3">
-        <VCard class="stat-card" @click="filterByStatus(true)" style="cursor: pointer;">
+        <VCard
+          class="stat-card"
+          @click="filterByStatus(true)"
+          style="cursor: pointer"
+        >
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="success"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="success" variant="tonal" class="me-4">
               <VIcon icon="tabler-check" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.verified_installations || 0 }}</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.verified_installations || 0 }}
+              </div>
               <div class="text-caption text-medium-emphasis">Installed</div>
             </div>
           </VCardText>
@@ -58,17 +78,19 @@
       </VCol>
 
       <VCol cols="12" sm="6" md="3">
-        <VCard class="stat-card" @click="filterByStatus(false)" style="cursor: pointer;">
+        <VCard
+          class="stat-card"
+          @click="filterByStatus(false)"
+          style="cursor: pointer"
+        >
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="warning"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="warning" variant="tonal" class="me-4">
               <VIcon icon="tabler-clock" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.pending_verification || 0 }}</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.pending_verification || 0 }}
+              </div>
               <div class="text-caption text-medium-emphasis">Delivered</div>
             </div>
           </VCardText>
@@ -78,15 +100,13 @@
       <VCol cols="12" sm="6" md="3">
         <VCard class="stat-card">
           <VCardText class="d-flex align-center">
-            <VAvatar
-              color="info"
-              variant="tonal"
-              class="me-4"
-            >
+            <VAvatar color="info" variant="tonal" class="me-4">
               <VIcon icon="tabler-calendar" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-semibold">{{ statistics.installations_this_month || 0 }}</div>
+              <div class="text-h6 font-weight-semibold">
+                {{ statistics.installations_this_month || 0 }}
+              </div>
               <div class="text-caption text-medium-emphasis">This Month</div>
             </div>
           </VCardText>
@@ -148,10 +168,7 @@
               Apply Filters
             </VBtn>
 
-            <VBtn
-              variant="tonal"
-              @click="clearFilters"
-            >
+            <VBtn variant="tonal" @click="clearFilters">
               <VIcon icon="tabler-rotate-2" class="me-2" />
               Clear Filters
             </VBtn>
@@ -166,7 +183,9 @@
         <!-- Table Header with Row Count -->
         <div class="d-flex justify-space-between align-center pa-4 border-b">
           <div class="text-body-1 font-weight-medium">
-            Showing {{ installations.from || 0 }} to {{ installations.to || 0 }} of {{ installations.total || 0 }} entries
+            Showing {{ installations.from || 0 }} to
+            {{ installations.to || 0 }} of
+            {{ installations.total || 0 }} entries
           </div>
           <div class="d-flex align-center gap-2">
             <VBtn
@@ -177,11 +196,13 @@
               @click="decreasePageSize"
             >
               <VIcon icon="tabler-chevron-left" />
-              <VTooltip activator="parent" location="top">Show fewer rows</VTooltip>
+              <VTooltip activator="parent" location="top"
+                >Show fewer rows</VTooltip
+              >
             </VBtn>
-            
+
             <span class="text-caption">Show: {{ filters.per_page }}</span>
-            
+
             <VBtn
               icon
               variant="text"
@@ -190,7 +211,9 @@
               @click="increasePageSize"
             >
               <VIcon icon="tabler-chevron-right" />
-              <VTooltip activator="parent" location="top">Show more rows</VTooltip>
+              <VTooltip activator="parent" location="top"
+                >Show more rows</VTooltip
+              >
             </VBtn>
           </div>
         </div>
@@ -210,23 +233,22 @@
           <tbody>
             <tr v-if="loading">
               <td colspan="7" class="text-center py-8">
-                <VProgressCircular
-                  indeterminate
-                  color="primary"
-                />
+                <VProgressCircular indeterminate color="primary" />
                 <div class="text-body-2 mt-2">Loading installations...</div>
               </td>
             </tr>
 
             <tr v-else-if="installations.data.length === 0">
               <td colspan="7" class="text-center py-8">
-                <VIcon icon="tabler-package-off" size="48" class="text-medium-emphasis mb-2" />
-                <div class="text-body-1 text-medium-emphasis">No installations found</div>
-                <VBtn
-                  variant="tonal"
-                  class="mt-2"
-                  @click="clearFilters"
-                >
+                <VIcon
+                  icon="tabler-package-off"
+                  size="48"
+                  class="text-medium-emphasis mb-2"
+                />
+                <div class="text-body-1 text-medium-emphasis">
+                  No installations found
+                </div>
+                <VBtn variant="tonal" class="mt-2" @click="clearFilters">
                   Clear Filters
                 </VBtn>
               </td>
@@ -249,7 +271,9 @@
                     <VIcon icon="tabler-building" />
                   </VAvatar>
                   <div>
-                    <div class="font-weight-medium text-primary">{{ installation.facility?.name }}</div>
+                    <div class="font-weight-medium text-primary">
+                      {{ installation.facility?.name }}
+                    </div>
                     <div class="text-caption text-medium-emphasis">
                       {{ installation.facility?.address }}
                     </div>
@@ -267,11 +291,16 @@
                 </VChip>
               </td>
               <td>
-                <span class="text-body-2">{{ installation.facility?.lga?.name }}</span>
+                <span class="text-body-2">{{
+                  installation.facility?.lga?.name
+                }}</span>
               </td>
-              
+
               <td>
-                <div v-if="installation.health_officer" class="d-flex align-center">
+                <div
+                  v-if="installation.health_officer"
+                  class="d-flex align-center"
+                >
                   <VAvatar
                     size="28"
                     color="secondary"
@@ -280,18 +309,22 @@
                   >
                     <VIcon icon="tabler-user" size="16" />
                   </VAvatar>
-                  <span class="text-body-2">{{ installation.health_officer.name }}</span>
+                  <span class="text-body-2">{{
+                    installation.health_officer.name
+                  }}</span>
                 </div>
-                <span v-else class="text-caption text-medium-emphasis">Not assigned</span>
+                <span v-else class="text-caption text-medium-emphasis"
+                  >Not assigned</span
+                >
               </td>
-             
+
               <td>
                 <VChip
                   :color="getDeliveryStatusColor(installation.delivery_status)"
                   variant="flat"
                   size="small"
                   @click.stop="openUpdateDialog(installation, 'delivery')"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                 >
                   <VIcon
                     :icon="getDeliveryStatusIcon(installation.delivery_status)"
@@ -304,21 +337,27 @@
 
               <td>
                 <VChip
-                  :color="getInstallationStatusColor(installation.installation_status)"
+                  :color="
+                    getInstallationStatusColor(installation.installation_status)
+                  "
                   variant="flat"
                   size="small"
                   @click.stop="openUpdateDialog(installation, 'installation')"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                 >
                   <VIcon
-                    :icon="getInstallationStatusIcon(installation.installation_status)"
+                    :icon="
+                      getInstallationStatusIcon(
+                        installation.installation_status
+                      )
+                    "
                     class="me-1"
                     size="16"
                   />
                   {{ formatStatus(installation.installation_status) }}
                 </VChip>
               </td>
-              
+
               <td>
                 <div class="d-flex gap-2">
                   <VBtn
@@ -329,7 +368,9 @@
                     @click.stop="openUpdateDialog(installation, 'both')"
                   >
                     <VIcon icon="tabler-edit" size="20" />
-                    <VTooltip activator="parent" location="top">Update Status</VTooltip>
+                    <VTooltip activator="parent" location="top"
+                      >Update Status</VTooltip
+                    >
                   </VBtn>
 
                   <VBtn
@@ -340,22 +381,36 @@
                     @click.stop="goToInstallationDetail(installation.id)"
                   >
                     <VIcon icon="tabler-eye" size="20" />
-                    <VTooltip activator="parent" location="top">View Details</VTooltip>
+                    <VTooltip activator="parent" location="top"
+                      >View Details</VTooltip
+                    >
                   </VBtn>
 
                   <VBtn
                     icon
                     variant="text"
                     size="small"
-                    :color="installation.verified_by_health_officer ? 'warning' : 'success'"
+                    :color="
+                      installation.verified_by_health_officer
+                        ? 'warning'
+                        : 'success'
+                    "
                     @click.stop="toggleVerification(installation)"
                   >
                     <VIcon
-                      :icon="installation.verified_by_health_officer ? 'tabler-x' : 'tabler-check'"
+                      :icon="
+                        installation.verified_by_health_officer
+                          ? 'tabler-x'
+                          : 'tabler-check'
+                      "
                       size="20"
                     />
                     <VTooltip activator="parent" location="top">
-                      {{ installation.verified_by_health_officer ? 'Unverify' : 'Verify' }}
+                      {{
+                        installation.verified_by_health_officer
+                          ? "Unverify"
+                          : "Verify"
+                      }}
                     </VTooltip>
                   </VBtn>
                 </div>
@@ -368,7 +423,8 @@
         <VRow v-if="installations.data.length > 0" class="mt-4 pa-4 border-t">
           <VCol cols="12" class="d-flex justify-space-between align-center">
             <div class="text-caption text-medium-emphasis">
-              Page {{ installations.current_page }} of {{ installations.last_page }}
+              Page {{ installations.current_page }} of
+              {{ installations.last_page }}
             </div>
             <VPagination
               v-model="filters.page"
@@ -390,15 +446,18 @@
             <VIcon icon="tabler-x" />
           </VBtn>
         </VCardTitle>
-        
+
         <VCardText>
           <VRow>
             <!-- Facility Info -->
             <VCol cols="12">
               <div class="facility-info mb-4 pa-3 rounded bg-grey-lighten-4">
-                <div class="text-h6">{{ selectedInstallation?.facility?.name }}</div>
+                <div class="text-h6">
+                  {{ selectedInstallation?.facility?.name }}
+                </div>
                 <div class="text-caption text-medium-emphasis">
-                  {{ selectedInstallation?.facility?.state?.name }} • {{ selectedInstallation?.facility?.lga?.name }}
+                  {{ selectedInstallation?.facility?.state?.name }} •
+                  {{ selectedInstallation?.facility?.lga?.name }}
                 </div>
               </div>
             </VCol>
@@ -424,15 +483,24 @@
             </VCol>
 
             <!-- Quick Status Buttons -->
-            <VCol cols="12" v-if="updateType === 'delivery' || updateType === 'both'">
+            <VCol
+              cols="12"
+              v-if="updateType === 'delivery' || updateType === 'both'"
+            >
               <div class="quick-actions mb-4">
-                <div class="text-caption text-medium-emphasis mb-2">Quick Delivery Actions:</div>
+                <div class="text-caption text-medium-emphasis mb-2">
+                  Quick Delivery Actions:
+                </div>
                 <div class="d-flex flex-wrap gap-2">
                   <VBtn
                     v-for="status in deliveryStatuses"
                     :key="status"
                     size="small"
-                    :color="updateData.delivery_status === status ? 'primary' : 'secondary'"
+                    :color="
+                      updateData.delivery_status === status
+                        ? 'primary'
+                        : 'secondary'
+                    "
                     variant="outlined"
                     @click="updateData.delivery_status = status"
                   >
@@ -442,15 +510,24 @@
               </div>
             </VCol>
 
-            <VCol cols="12" v-if="updateType === 'installation' || updateType === 'both'">
+            <VCol
+              cols="12"
+              v-if="updateType === 'installation' || updateType === 'both'"
+            >
               <div class="quick-actions mb-4">
-                <div class="text-caption text-medium-emphasis mb-2">Quick Installation Actions:</div>
+                <div class="text-caption text-medium-emphasis mb-2">
+                  Quick Installation Actions:
+                </div>
                 <div class="d-flex flex-wrap gap-2">
                   <VBtn
                     v-for="status in installationStatuses"
                     :key="status"
                     size="small"
-                    :color="updateData.installation_status === status ? 'primary' : 'secondary'"
+                    :color="
+                      updateData.installation_status === status
+                        ? 'primary'
+                        : 'secondary'
+                    "
                     variant="outlined"
                     @click="updateData.installation_status = status"
                   >
@@ -476,9 +553,9 @@
         <VCardActions>
           <VSpacer />
           <VBtn variant="tonal" @click="closeUpdateDialog">Cancel</VBtn>
-          <VBtn 
-            color="primary" 
-            @click="updateInstallationStatus" 
+          <VBtn
+            color="primary"
+            @click="updateInstallationStatus"
             :loading="updating"
             :disabled="!isStatusChanged"
           >
@@ -491,379 +568,512 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import installationService from '@/services/installationService'
-import SimpleExportButton from '@/components/SimpleExportButton.vue'
+import SimpleExportButton from "@/components/SimpleExportButton.vue";
+import installationService from "@/services/installationService";
+import lccoService from "@/services/lccoService";
+import frontendExport from "@/utils/fontendExport";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
-
-const router = useRouter()
+const router = useRouter();
 
 // Reactive data
-const loading = ref(false)
-const updating = ref(false)
-const installations = ref({ data: [] })
-const statistics = ref({})
-const statesData = ref([])
+const loading = ref(false);
+const updating = ref(false);
+const installations = ref({ data: [] });
+const statistics = ref({});
+const statesData = ref([]);
+const isExportingLcco = ref(false);
 
 // Status arrays
-const deliveryStatuses = ref(['not delivered', 'in transit', 'delivered', 'partially delivered'])
-const installationStatuses = ref(['not installed', 'in progress', 'installed', 'partially installed'])
+const deliveryStatuses = ref([
+  "not delivered",
+  "in transit",
+  "delivered",
+  "partially delivered",
+]);
+const installationStatuses = ref([
+  "not installed",
+  "in progress",
+  "installed",
+  "partially installed",
+]);
 
 // Dialog state
-const showUpdateDialog = ref(false)
-const selectedInstallation = ref(null)
-const updateType = ref('both') // 'delivery', 'installation', or 'both'
+const showUpdateDialog = ref(false);
+const selectedInstallation = ref(null);
+const updateType = ref("both"); // 'delivery', 'installation', or 'both'
 
 // Update form data
 const updateData = ref({
-  delivery_status: '',
-  installation_status: '',
-  remarks: ''
-})
+  delivery_status: "",
+  installation_status: "",
+  remarks: "",
+});
 
 // Page size options
 const pageSizeOptions = ref([
-  { title: '10 rows', value: 10 },
-  { title: '25 rows', value: 25 },
-  { title: '50 rows', value: 50 },
-  { title: '100 rows', value: 100 },
-  { title: 'All', value: 1000 }
-])
+  { title: "10 rows", value: 10 },
+  { title: "25 rows", value: 25 },
+  { title: "50 rows", value: 50 },
+  { title: "100 rows", value: 100 },
+  { title: "All", value: 1000 },
+]);
 
 const handleExportSuccess = (result) => {
-  console.log(`Exported ${result.count} installations successfully`)
+  console.log(`Exported ${result.count} installations successfully`);
   // Show success message
-}
+};
 
 // Status options for dropdowns
 const deliveryStatusOptions = computed(() => {
-  return deliveryStatuses.value.map(status => ({
+  return deliveryStatuses.value.map((status) => ({
     title: formatStatus(status),
-    value: status
-  }))
-})
+    value: status,
+  }));
+});
 
 const installationStatusOptions = computed(() => {
-  return installationStatuses.value.map(status => ({
+  return installationStatuses.value.map((status) => ({
     title: formatStatus(status),
-    value: status
-  }))
-})
+    value: status,
+  }));
+});
 
 const verificationOptions = ref([
-  { title: 'Verified', value: true },
-  { title: 'Not Verified', value: false }
-])
+  { title: "Verified", value: true },
+  { title: "Not Verified", value: false },
+]);
 
 // State options computed from states data
 const stateOptions = computed(() => {
-  return statesData.value.map(state => ({
+  return statesData.value.map((state) => ({
     title: state.name,
-    value: state.id
-  }))
-})
+    value: state.id,
+  }));
+});
 
 // Filters
 const filters = ref({
-  search: '',
+  search: "",
   state_id: null,
   verified: null,
   page: 1,
-  per_page: 25
-})
+  per_page: 25,
+});
 
 // Check if status has changed
 const isStatusChanged = computed(() => {
-  if (!selectedInstallation.value) return false
-  
-  const deliveryChanged = updateType.value !== 'installation' && 
-    updateData.value.delivery_status !== selectedInstallation.value.delivery_status
-  
-  const installationChanged = updateType.value !== 'delivery' && 
-    updateData.value.installation_status !== selectedInstallation.value.installation_status
-  
-  return deliveryChanged || installationChanged || updateData.value.remarks.trim() !== ''
-})
+  if (!selectedInstallation.value) return false;
+
+  const deliveryChanged =
+    updateType.value !== "installation" &&
+    updateData.value.delivery_status !==
+      selectedInstallation.value.delivery_status;
+
+  const installationChanged =
+    updateType.value !== "delivery" &&
+    updateData.value.installation_status !==
+      selectedInstallation.value.installation_status;
+
+  return (
+    deliveryChanged ||
+    installationChanged ||
+    updateData.value.remarks.trim() !== ""
+  );
+});
 
 // Watch for filter changes
-let searchTimeout
-watch(() => filters.value.search, (newSearch) => {
-  clearTimeout(searchTimeout)
-  if (newSearch !== null) {
-    searchTimeout = setTimeout(() => {
-      filters.value.page = 1
-      fetchInstallations()
-    }, 500)
+let searchTimeout;
+watch(
+  () => filters.value.search,
+  (newSearch) => {
+    clearTimeout(searchTimeout);
+    if (newSearch !== null) {
+      searchTimeout = setTimeout(() => {
+        filters.value.page = 1;
+        fetchInstallations();
+      }, 500);
+    }
   }
-})
+);
 
-watch(() => filters.value.per_page, () => {
-  filters.value.page = 1
-  fetchInstallations()
-})
+watch(
+  () => filters.value.per_page,
+  () => {
+    filters.value.page = 1;
+    fetchInstallations();
+  }
+);
 
 // Methods
 const fetchInstallations = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await installationService.getInstallations(filters.value)
+    const response = await installationService.getInstallations(filters.value);
     if (response.success) {
-      installations.value = response.data
+      installations.value = response.data;
     }
   } catch (error) {
-    console.error('Error fetching installations:', error)
+    console.error("Error fetching installations:", error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const fetchStatistics = async () => {
   try {
-    const response = await installationService.getDashboardSummary()
+    const response = await installationService.getDashboardSummary();
     if (response.success) {
-      statistics.value = response.data
+      statistics.value = response.data;
     }
   } catch (error) {
-    console.error('Error fetching statistics:', error)
+    console.error("Error fetching statistics:", error);
   }
-}
+};
 
 const fetchStates = async () => {
   try {
-    const response = await installationService.getStatesWithInstallations()
+    const response = await installationService.getStatesWithInstallations();
     if (response.success) {
-      statesData.value = response.data
+      statesData.value = response.data;
     }
   } catch (error) {
-    console.error('Error fetching states:', error)
+    console.error("Error fetching states:", error);
   }
-}
+};
 
 const goToInstallationDetail = (installationId) => {
-  router.push(`/installation/${installationId}`)
-}
+  router.push(`/installation/${installationId}`);
+};
 
-const openUpdateDialog = (installation, type = 'both') => {
-  selectedInstallation.value = installation
-  updateType.value = type
-  
+const openUpdateDialog = (installation, type = "both") => {
+  selectedInstallation.value = installation;
+  updateType.value = type;
+
   // Initialize form data
   updateData.value = {
-    delivery_status: installation.delivery_status || '',
-    installation_status: installation.installation_status || '',
-    remarks: installation.remarks || ''
-  }
-  
-  showUpdateDialog.value = true
-}
+    delivery_status: installation.delivery_status || "",
+    installation_status: installation.installation_status || "",
+    remarks: installation.remarks || "",
+  };
+
+  showUpdateDialog.value = true;
+};
 
 const closeUpdateDialog = () => {
-  showUpdateDialog.value = false
-  selectedInstallation.value = null
+  showUpdateDialog.value = false;
+  selectedInstallation.value = null;
   updateData.value = {
-    delivery_status: '',
-    installation_status: '',
-    remarks: ''
-  }
-}
+    delivery_status: "",
+    installation_status: "",
+    remarks: "",
+  };
+};
 
 const updateInstallationStatus = async () => {
-  if (!selectedInstallation.value || !isStatusChanged.value) return
-  
-  updating.value = true
+  if (!selectedInstallation.value || !isStatusChanged.value) return;
+
+  updating.value = true;
   try {
     // Use the specific update methods for status changes
-    if (updateType.value !== 'installation' && updateData.value.delivery_status !== selectedInstallation.value.delivery_status) {
-      await installationService.updateDeliveryStatus(selectedInstallation.value.id, updateData.value.delivery_status)
-      selectedInstallation.value.delivery_status = updateData.value.delivery_status
+    if (
+      updateType.value !== "installation" &&
+      updateData.value.delivery_status !==
+        selectedInstallation.value.delivery_status
+    ) {
+      await installationService.updateDeliveryStatus(
+        selectedInstallation.value.id,
+        updateData.value.delivery_status
+      );
+      selectedInstallation.value.delivery_status =
+        updateData.value.delivery_status;
     }
-    
-    if (updateType.value !== 'delivery' && updateData.value.installation_status !== selectedInstallation.value.installation_status) {
-      await installationService.updateInstallationStatus(selectedInstallation.value.id, updateData.value.installation_status)
-      selectedInstallation.value.installation_status = updateData.value.installation_status
+
+    if (
+      updateType.value !== "delivery" &&
+      updateData.value.installation_status !==
+        selectedInstallation.value.installation_status
+    ) {
+      await installationService.updateInstallationStatus(
+        selectedInstallation.value.id,
+        updateData.value.installation_status
+      );
+      selectedInstallation.value.installation_status =
+        updateData.value.installation_status;
     }
-    
+
     // Update remarks using the general update method if changed
-    if (updateData.value.remarks.trim() !== (selectedInstallation.value.remarks || '')) {
-      await installationService.updateInstallation(selectedInstallation.value.id, {
-        remarks: updateData.value.remarks
-      })
-      selectedInstallation.value.remarks = updateData.value.remarks
+    if (
+      updateData.value.remarks.trim() !==
+      (selectedInstallation.value.remarks || "")
+    ) {
+      await installationService.updateInstallation(
+        selectedInstallation.value.id,
+        {
+          remarks: updateData.value.remarks,
+        }
+      );
+      selectedInstallation.value.remarks = updateData.value.remarks;
     }
-    
+
     // Refresh data
-    fetchInstallations()
-    fetchStatistics()
-    
-    closeUpdateDialog()
+    fetchInstallations();
+    fetchStatistics();
+
+    closeUpdateDialog();
   } catch (error) {
-    console.error('Error updating installation:', error)
+    console.error("Error updating installation:", error);
   } finally {
-    updating.value = false
+    updating.value = false;
   }
-}
+};
 
 // Individual status update methods
 const updateDeliveryStatus = async (status) => {
-  if (!selectedInstallation.value) return
-  
+  if (!selectedInstallation.value) return;
+
   try {
-    await installationService.updateDeliveryStatus(selectedInstallation.value.id, status)
-    selectedInstallation.value.delivery_status = status
+    await installationService.updateDeliveryStatus(
+      selectedInstallation.value.id,
+      status
+    );
+    selectedInstallation.value.delivery_status = status;
     // Refresh data
-    fetchInstallations()
-    fetchStatistics()
+    fetchInstallations();
+    fetchStatistics();
   } catch (err) {
-    console.error('Error updating delivery status:', err)
+    console.error("Error updating delivery status:", err);
   }
-}
+};
 
 const updateInstallationStatusIndividual = async (status) => {
-  if (!selectedInstallation.value) return
-  
+  if (!selectedInstallation.value) return;
+
   try {
-    await installationService.updateInstallationStatus(selectedInstallation.value.id, status)
-    selectedInstallation.value.installation_status = status
+    await installationService.updateInstallationStatus(
+      selectedInstallation.value.id,
+      status
+    );
+    selectedInstallation.value.installation_status = status;
     // Refresh data
-    fetchInstallations()
-    fetchStatistics()
+    fetchInstallations();
+    fetchStatistics();
   } catch (err) {
-    console.error('Error updating installation status:', err)
+    console.error("Error updating installation status:", err);
   }
-}
+};
 
 const toggleVerification = async (installation) => {
   try {
-    const newStatus = !installation.verified_by_health_officer
-    await installationService.updateVerification(installation.id, newStatus)
-    
+    const newStatus = !installation.verified_by_health_officer;
+    await installationService.updateVerification(installation.id, newStatus);
+
     // Update local state
-    installation.verified_by_health_officer = newStatus
-    
+    installation.verified_by_health_officer = newStatus;
+
     // Refresh statistics
-    fetchStatistics()
+    fetchStatistics();
   } catch (error) {
-    console.error('Error updating verification:', error)
+    console.error("Error updating verification:", error);
   }
-}
+};
 
 const filterByStatus = (status) => {
-  filters.value.verified = status
-  filters.value.page = 1
-  fetchInstallations()
-}
+  filters.value.verified = status;
+  filters.value.page = 1;
+  fetchInstallations();
+};
 
 const clearFilters = () => {
   filters.value = {
-    search: '',
+    search: "",
     state_id: null,
     verified: null,
     page: 1,
-    per_page: 25
-  }
-  fetchInstallations()
-}
+    per_page: 25,
+  };
+  fetchInstallations();
+};
 
 const clearSearch = () => {
-  filters.value.search = ''
-  fetchInstallations()
-}
+  filters.value.search = "";
+  fetchInstallations();
+};
 
 const increasePageSize = () => {
-  const currentIndex = pageSizeOptions.value.findIndex(opt => opt.value === filters.value.per_page)
+  const currentIndex = pageSizeOptions.value.findIndex(
+    (opt) => opt.value === filters.value.per_page
+  );
   if (currentIndex < pageSizeOptions.value.length - 1) {
-    filters.value.per_page = pageSizeOptions.value[currentIndex + 1].value
+    filters.value.per_page = pageSizeOptions.value[currentIndex + 1].value;
   }
-}
+};
 
 const decreasePageSize = () => {
-  const currentIndex = pageSizeOptions.value.findIndex(opt => opt.value === filters.value.per_page)
+  const currentIndex = pageSizeOptions.value.findIndex(
+    (opt) => opt.value === filters.value.per_page
+  );
   if (currentIndex > 0) {
-    filters.value.per_page = pageSizeOptions.value[currentIndex - 1].value
+    filters.value.per_page = pageSizeOptions.value[currentIndex - 1].value;
   }
-}
+};
 
 const exportData = async () => {
   try {
-    const response = await installationService.exportInstallations(filters.value)
+    const response = await installationService.exportInstallations(
+      filters.value
+    );
     if (response.success) {
-      console.log('Export data:', response.data)
+      console.log("Export data:", response.data);
       // Handle file download here
     }
   } catch (error) {
-    console.error('Error exporting data:', error)
+    console.error("Error exporting data:", error);
   }
-}
+};
+
+const exportLccoDetails = async () => {
+  isExportingLcco.value = true;
+  try {
+    // fetch LCCO records
+    const lccoRes = await lccoService.index();
+    let lccoData = [];
+    if (lccoRes && lccoRes.success && Array.isArray(lccoRes.data))
+      lccoData = lccoRes.data;
+    else if (
+      lccoRes &&
+      lccoRes.success &&
+      lccoRes.data &&
+      Array.isArray(lccoRes.data.data)
+    )
+      lccoData = lccoRes.data.data;
+
+    if (!lccoData || lccoData.length === 0) {
+      console.info("No LCCO records to export");
+      return;
+    }
+
+    // fetch all installations to build map
+    const instRes = await installationService.exportAllInstallations(
+      filters.value
+    );
+    let allInst = [];
+    if (instRes && instRes.success && Array.isArray(instRes.data))
+      allInst = instRes.data;
+    else if (
+      instRes &&
+      instRes.success &&
+      instRes.data &&
+      Array.isArray(instRes.data.data)
+    )
+      allInst = instRes.data.data;
+
+    const instMap = {};
+    allInst.forEach((i) => {
+      if (i && i.id) instMap[i.id] = i;
+    });
+
+    frontendExport.exportLccoDetails(lccoData, instMap);
+    console.log(`Exported ${lccoData.length} LCCO records`);
+  } catch (err) {
+    console.error("Failed to export LCCO details", err);
+  } finally {
+    isExportingLcco.value = false;
+  }
+};
 
 // Status formatting helpers
 const formatStatus = (status) => {
-  return status ? status.split('_').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ') : 'Unknown'
-}
+  return status
+    ? status
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "Unknown";
+};
 
 const getDeliveryStatusColor = (status) => {
   switch (status) {
-    case 'delivered': return 'success'
-    case 'partially delivered': return 'warning'
-    case 'in transit': return 'info'
-    case 'not delivered': return 'error'
-    default: return 'secondary'
+    case "delivered":
+      return "success";
+    case "partially delivered":
+      return "warning";
+    case "in transit":
+      return "info";
+    case "not delivered":
+      return "error";
+    default:
+      return "secondary";
   }
-}
+};
 
 const getInstallationStatusColor = (status) => {
   switch (status) {
-    case 'installed': return 'success'
-    case 'partially installed': return 'warning'
-    case 'in progress': return 'info'
-    case 'not installed': return 'error'
-    default: return 'secondary'
+    case "installed":
+      return "success";
+    case "partially installed":
+      return "warning";
+    case "in progress":
+      return "info";
+    case "not installed":
+      return "error";
+    default:
+      return "secondary";
   }
-}
+};
 
 const getDeliveryStatusIcon = (status) => {
   switch (status) {
-    case 'delivered': return 'tabler-check'
-    case 'partially delivered': return 'tabler-package'
-    case 'in transit': return 'tabler-truck-delivery'
-    case 'not delivered': return 'tabler-x'
-    default: return 'tabler-package'
+    case "delivered":
+      return "tabler-check";
+    case "partially delivered":
+      return "tabler-package";
+    case "in transit":
+      return "tabler-truck-delivery";
+    case "not delivered":
+      return "tabler-x";
+    default:
+      return "tabler-package";
   }
-}
+};
 
 const getInstallationStatusIcon = (status) => {
   switch (status) {
-    case 'installed': return 'tabler-check'
-    case 'partially installed': return 'tabler-settings'
-    case 'in progress': return 'tabler-tools'
-    case 'not installed': return 'tabler-x'
-    default: return 'tabler-settings'
+    case "installed":
+      return "tabler-check";
+    case "partially installed":
+      return "tabler-settings";
+    case "in progress":
+      return "tabler-tools";
+    case "not installed":
+      return "tabler-x";
+    default:
+      return "tabler-settings";
   }
-}
+};
 
 // Lifecycle
 onMounted(() => {
-  fetchInstallations()
-  fetchStatistics()
-  fetchStates()
-})
+  fetchInstallations();
+  fetchStatistics();
+  fetchStates();
+});
 </script>
 
 <style scoped>
 .stat-card {
-  transition: all 0.3s ease;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 10%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .installation-table {
-  width: 100%;
+  inline-size: 100%;
 }
 
 .installation-row {
@@ -875,21 +1085,23 @@ onMounted(() => {
 }
 
 .border-b {
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-block-end: 1px solid
+    rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .border-t {
-  border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-block-start: 1px solid
+    rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .facility-info {
-  border-left: 4px solid rgb(var(--v-theme-primary));
+  border-inline-start: 4px solid rgb(var(--v-theme-primary));
 }
 
 .quick-actions {
+  padding: 12px;
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 8px;
-  padding: 12px;
   background: rgba(var(--v-theme-surface), 0.5);
 }
 </style>
