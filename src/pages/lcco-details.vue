@@ -240,6 +240,26 @@ const onInstallationChange = () => {
       installation.device_serial_number || installation.serial_number || "";
     form.value.installation_status =
       installation.installation_status || installation.status || "";
+
+    // If we already have an LCCO record for this installation, prefill the form
+    const existing = lccoMap.value[installation.id];
+    if (existing) {
+      form.value.lcco_name = existing.lcco_name || form.value.lcco_name || "";
+      form.value.lcco_phone =
+        existing.lcco_phone || form.value.lcco_phone || "";
+      form.value.lcco_bank_name =
+        existing.lcco_bank_name || form.value.lcco_bank_name || "";
+      form.value.lcco_account_number =
+        existing.lcco_account_number || form.value.lcco_account_number || "";
+      form.value.lcco_account_name =
+        existing.lcco_account_name || form.value.lcco_account_name || "";
+      form.value.payment_status =
+        existing.payment_status || form.value.payment_status || "";
+      form.value.device_tag_code =
+        existing.device_tag_code || form.value.device_tag_code;
+      form.value.device_serial_number =
+        existing.device_serial_number || form.value.device_serial_number;
+    }
   } else {
     form.value.installation_id = null;
   }
@@ -423,6 +443,16 @@ const submitLcco = async () => {
                   label="LCCO Name"
                   :disabled="isLoading"
                   :error-messages="errors.lcco_name"
+                />
+              </VCol>
+
+              <VCol cols="12">
+                <AppTextField
+                  v-model="form.lcco_phone"
+                  label="LCCO Contact Phone"
+                  placeholder="+2348012345678"
+                  :disabled="isLoading"
+                  :error-messages="errors.lcco_phone"
                 />
               </VCol>
 
