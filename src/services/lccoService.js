@@ -12,7 +12,8 @@ class LccoService {
 
   async index(filters = {}) {
     try {
-      const response = await api.get('/lcco-pr')
+      // Allow callers to pass filters (e.g., per_page) so exports can request all records
+      const response = await api.get('/lcco-pr', { params: filters })
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to fetch LCCO records')

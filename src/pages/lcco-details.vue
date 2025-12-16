@@ -287,6 +287,23 @@ const submitLcco = async () => {
     return;
   }
 
+  // Require device tag and serial numbers (client-side validation)
+  const missingTag =
+    !form.value.device_tag_code ||
+    form.value.device_tag_code.toString().trim() === "";
+  const missingSerial =
+    !form.value.device_serial_number ||
+    form.value.device_serial_number.toString().trim() === "";
+  if (missingTag || missingSerial) {
+    if (missingTag)
+      errors.value.device_tag_code = ["Device tag number is required"];
+    if (missingSerial)
+      errors.value.device_serial_number = ["Device serial number is required"];
+    message.value = "Please provide device tag number and serial number.";
+    console.warn("submitLcco validation failed: missing device tag/serial");
+    return;
+  }
+
   isLoading.value = true;
   console.log("submitLcco: submitting", {
     installation_id: form.value.installation_id,
@@ -334,60 +351,6 @@ const submitLcco = async () => {
     <VCol cols="12" md="6">
       <VCard flat class="pa-6">
         <VCardText>
-          <!-- Filters for table -->
-          <VRow class="mb-4">
-            <VCol cols="12" sm="6" md="4">
-              <AppTextField
-                v-model="tableFilters.search"
-                label="Search"
-                placeholder="Search installations or LCCO..."
-                prepend-inner-icon="tabler-search"
-                clearable
-                @click:clear="
-                  () => {
-                    tableFilters.value.search = '';
-                  }
-                "
-              />
-            </VCol>
-
-            <VCol cols="12" sm="6" md="4">
-              <AppSelect
-                v-model="tableFilters.state"
-                :items="statesData"
-                item-title="name"
-                item-value="name"
-                label="State"
-                clearable
-              />
-            </VCol>
-
-            <VCol cols="12" sm="6" md="2">
-              <AppSelect
-                v-model="tableFilters.per_page"
-                :items="[10, 25, 50, 100]"
-                label="Items per page"
-              />
-            </VCol>
-
-            <VCol cols="12" sm="6" md="2" class="d-flex align-center">
-              <VBtn
-                variant="tonal"
-                @click="
-                  () => {
-                    tableFilters.value = {
-                      search: '',
-                      state: null,
-                      per_page: 10,
-                      page: 1,
-                    };
-                  }
-                "
-              >
-                Clear
-              </VBtn>
-            </VCol>
-          </VRow>
           <h4 class="text-h6 mb-2">LCCO Details</h4>
           <p class="mb-4">Select a state and click Update.</p>
         </VCardText>
@@ -489,6 +452,7 @@ const submitLcco = async () => {
                   label="Device Tag Number"
                   placeholder="NPHCDA/GF/ADA/SDD/125/***"
                   :disabled="isLoading"
+                  :error-messages="errors.device_tag_code"
                 />
               </VCol>
 
@@ -498,6 +462,7 @@ const submitLcco = async () => {
                   label="Device Serial Number"
                   placeholder="BE0G31GAT00QER****"
                   :disabled="isLoading"
+                  :error-messages="errors.device_serial_number"
                 />
               </VCol>
 
@@ -523,6 +488,60 @@ const submitLcco = async () => {
       <VCard flat class="pa-4 mt-6">
         <VCardTitle>Installations</VCardTitle>
         <VCardText>
+          <!-- Filters for table -->
+          <VRow class="mb-4">
+            <VCol cols="12" sm="6" md="4">
+              <AppTextField
+                v-model="tableFilters.search"
+                label="Search"
+                placeholder="Search installations or LCCO..."
+                prepend-inner-icon="tabler-search"
+                clearable
+                @click:clear="
+                  () => {
+                    tableFilters.value.search = '';
+                  }
+                "
+              />
+            </VCol>
+
+            <VCol cols="12" sm="6" md="4">
+              <AppSelect
+                v-model="tableFilters.state"
+                :items="statesData"
+                item-title="name"
+                item-value="name"
+                label="State"
+                clearable
+              />
+            </VCol>
+
+            <VCol cols="12" sm="6" md="2">
+              <AppSelect
+                v-model="tableFilters.per_page"
+                :items="[10, 25, 50, 100]"
+                label="Items per page"
+              />
+            </VCol>
+
+            <VCol cols="12" sm="6" md="2" class="d-flex align-center">
+              <VBtn
+                variant="tonal"
+                @click="
+                  () => {
+                    tableFilters.value = {
+                      search: '',
+                      state: null,
+                      per_page: 10,
+                      page: 1,
+                    };
+                  }
+                "
+              >
+                Clear
+              </VBtn>
+            </VCol>
+          </VRow>
           <VTable class="installation-table">
             <thead>
               <tr>

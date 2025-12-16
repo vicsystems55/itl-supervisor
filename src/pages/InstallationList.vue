@@ -577,7 +577,8 @@ const exportLccoDetails = async () => {
   isExportingLcco.value = true;
   try {
     // fetch LCCO records
-    const lccoRes = await lccoService.index();
+    // Request all LCCO records when exporting to avoid default pagination limit
+    const lccoRes = await lccoService.index({ per_page: 9999 });
     let lccoData = [];
     if (lccoRes && lccoRes.success && Array.isArray(lccoRes.data))
       lccoData = lccoRes.data;
