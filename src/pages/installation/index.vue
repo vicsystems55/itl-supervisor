@@ -17,21 +17,22 @@
             tooltip="Export ALL installations with current filters"
             @export-success="handleAllExportSuccess"
           />
+
+          <VBtn
+            color="primary"
+            variant="elevated"
+            class="ms-3"
+            @click="exportLccoDetails"
+            :loading="isExportingLcco"
+          >
+            <VIcon icon="tabler-file-export" class="me-2" />
+            Export LCCO Details
+          </VBtn>
         </div>
       </VCol>
     </VRow>
 
     <!-- Export LCCO Details button -->
-    <VBtn
-      color="secondary"
-      variant="tonal"
-      class="ms-3"
-      @click="exportLccoDetails"
-      :loading="isExportingLcco"
-    >
-      <VIcon icon="tabler-file-export" class="me-2" />
-      Export LCCO Details
-    </VBtn>
 
     <!-- Statistics Cards -->
     <VRow class="mb-6">
@@ -955,9 +956,11 @@ const exportLccoDetails = async () => {
     }
 
     // fetch all installations to build map
-    const instRes = await installationService.exportAllInstallations(
-      filters.value
-    );
+    // Fetch full installation records (includes id and nested facility data)
+    const instRes = await installationService.getInstallations({
+      ...filters.value,
+      per_page: 9999,
+    });
     let allInst = [];
     if (instRes && instRes.success && Array.isArray(instRes.data))
       allInst = instRes.data;

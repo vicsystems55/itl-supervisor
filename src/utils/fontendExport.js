@@ -316,20 +316,72 @@ class FrontendExportService {
       throw new Error('No LCCO records to export')
     }
 
-    const exportData = lccos.map((r, index) => {
-      const inst = installationMap && installationMap[r.installation_id] ? installationMap[r.installation_id] : null
-      return {
-        'S/N': index + 1,
-        'Installation ID': r.installation_id || (r.installation ? r.installation.id : 'N/A'),
-        'Facility Name': inst?.facility?.name || (r.installation?.facility?.name) || 'N/A',
-        'LCCO Name': r.lcco_name || r.name || 'N/A',
-        'LCCO Phone': r.lcco_phone || r.phone || 'N/A',
-        'Bank Name': r.lcco_bank_name || r.bank_name || 'N/A',
-        'Account Number': r.lcco_account_number || r.account_number || 'N/A',
-        'Account Name': r.lcco_account_name || r.account_name || 'N/A',
-        'Device Serial': r.device_serial_number || r.serial_number || 'N/A',
-        'Device Tag': r.device_tag_code || r.tag_code || 'N/A',
-        'Created At': r.created_at ? new Date(r.created_at).toLocaleString() : (r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A')
+    const exportData = []
+    lccos.forEach((r, index) => {
+      try {
+        // Defensive lookup for installation map (handles string/number keys)
+        const inst = installationMap?.[r.installation_id] ?? installationMap?.[String(r.installation_id)] ?? installationMap?.[Number(r.installation_id)] ?? null
+
+        const installationId = r.installation_id ?? (r.installation ? r.installation.id : 'N/A')
+        // Try multiple common fields for facility/site name (handles different API shapes)
+        const facilityName =
+          inst?.facility?.name ??
+          inst?.site_name ??
+          inst?.name ??
+          inst?.facility_name ??
+          inst?.facilityName ??
+          r.installation?.facility?.name ??
+          r.installation?.site_name ??
+          r.installation?.name ??
+          r.installation?.facility_name ??
+          r.installation?.facilityName ??
+          'N/A'
+
+        const createdAtRaw = r.created_at ?? r.createdAt
+        const createdAt = createdAtRaw ? (isNaN(Date.parse(createdAtRaw)) ? String(createdAtRaw) : new Date(createdAtRaw).toLocaleString()) : 'N/A'
+
+        // Defensive state and LGA resolution (handle different API shapes)
+        const stateName =
+          inst?.facility?.state?.name ??
+          inst?.state ??
+          inst?.province ??
+          inst?.state_name ??
+          inst?.stateName ??
+          r.installation?.province ??
+          r.installation?.state ??
+          r.installation?.state_name ??
+          r.installation?.stateName ??
+          'N/A'
+
+        const lgaName =
+          inst?.facility?.lga?.name ??
+          inst?.lga ??
+          inst?.lga_name ??
+          inst?.lgaName ??
+          r.installation?.lga ??
+          r.installation?.lga_name ??
+          r.installation?.lgaName ??
+          (r.installation?.facility?.lga?.name ?? null) ??
+          'N/A'
+
+        exportData.push({
+          'S/N': index + 1,
+          'Installation ID': installationId,
+          'Facility Name': facilityName,
+          'State': stateName,
+          'LGA': lgaName,
+          'LCCO Name': r.lcco_name || r.name || 'N/A',
+          'LCCO Phone': r.lcco_phone || r.phone || 'N/A',
+          'Bank Name': r.lcco_bank_name || r.bank_name || 'N/A',
+          'Account Number': r.lcco_account_number || r.account_number || 'N/A',
+          'Account Name': r.lcco_account_name || r.account_name || 'N/A',
+          'Device Serial': r.device_serial_number || r.serial_number || 'N/A',
+          'Device Tag': r.device_tag_code || r.tag_code || 'N/A',
+          'Created At': createdAt
+        })
+      } catch (err) {
+        // Log and skip problematic records to ensure export continues
+        console.error('Error preparing LCCO export row', { error: err, record: r })
       }
     })
 
