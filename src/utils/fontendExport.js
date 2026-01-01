@@ -306,6 +306,78 @@ class FrontendExportService {
   }
 
   /**
+   * Export installations list with aggregated LCCO fields
+   * - Merges LCCO records (one-to-many) into installation rows by installation_id
+   * @param {Array} installations - Array of installation objects (or backend export rows)
+   * @param {Object|Array} lccosOrMap - Either a map of installation_id => [lccoRecords] or an array of lcco records
+   * @param {string} filename
+   */
+  exportInstallationsWithLcco(installations, lccosOrMap = {}, filename = null) {
+    if (!installations || installations.length === 0) {
+      throw new Error('No installations data to export')
+    }
+
+    // Normalize lcco map: accept either an object map or an array of lcco records
+    let lccoMap = {}
+    if (Array.isArray(lccosOrMap)) {
+      lccosOrMap.forEach(r => {
+        if (!r) return
+        const key = r.installation_id ?? (r.installation ? r.installation.id : null)
+        if (!key) return
+        if (!lccoMap[key]) lccoMap[key] = []
+        lccoMap[key].push(r)
+      })
+    } else {
+      lccoMap = lccosOrMap || {}
+    }
+
+    const joinUnique = (arr, selector) => {
+      if (!arr || arr.length === 0) return 'N/A'
+      const vals = arr.map(selector).filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+      const unique = Array.from(new Set(vals.map(String)))
+      return unique.length ? unique.join(' | ') : 'N/A'
+    }
+
+    const exportData = installations.map((installation, index) => {
+      const isBackendExportData = installation && installation.hasOwnProperty('Facility Name')
+
+      // Resolve installation id for lookup
+      const installationId = isBackendExportData ? (installation['Installation ID'] ?? null) : (installation.id ?? null)
+
+      const lccos = installationId && lccoMap[installationId] ? lccoMap[installationId] : []
+
+      return {
+        'S/N': index + 1,
+        'Facility Name': isBackendExportData ? installation['Facility Name'] : installation.facility?.name || installation.site_name || installation.name || 'N/A',
+        'State': isBackendExportData ? installation['State'] : installation.facility?.state?.name || installation.province || 'N/A',
+        'LGA': isBackendExportData ? installation['LGA'] : installation.facility?.lga?.name || installation.lga || 'N/A',
+        'Country': isBackendExportData ? installation['Country'] : installation.country || 'N/A',
+        'Delivery Status': isBackendExportData ? installation['Delivery Status'] : installation.delivery_status || 'N/A',
+        'Installation Status': isBackendExportData ? installation['Installation Status'] : installation.installation_status || 'N/A',
+        'Health Officer': isBackendExportData ? installation['Health Officer'] : installation.health_officer?.name || installation.healthOfficer?.name || 'N/A',
+        'LCCO Name': joinUnique(lccos, r => r.lcco_name || r.name),
+        'LCCO Phone': joinUnique(lccos, r => r.lcco_phone || r.phone),
+        'Bank Name': joinUnique(lccos, r => r.lcco_bank_name || r.bank_name),
+        'Account Number': joinUnique(lccos, r => r.lcco_account_number || r.account_number),
+        'Account Name': joinUnique(lccos, r => r.lcco_account_name || r.account_name),
+        'Device Serial': joinUnique(lccos, r => r.device_serial_number || r.serial_number),
+        'Device Tag': joinUnique(lccos, r => r.device_tag_code || r.tag_code),
+        'Last Updated': isBackendExportData ? installation['Last Updated'] : (installation.updated_at ? new Date(installation.updated_at).toLocaleDateString() : 'N/A')
+      }
+    })
+
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    this.autoFitColumns(ws, exportData)
+    XLSX.utils.book_append_sheet(wb, ws, 'Installations with LCCO')
+
+    const exportFilename = filename || `installations_with_lcco_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, exportFilename)
+
+    return exportData.length
+  }
+
+  /**
    * Export LCCO details with contact and bank/account fields
    * @param {Array} lccos - Array of LCCO records
    * @param {Object} installationMap - Map of installation_id => installation object (optional)

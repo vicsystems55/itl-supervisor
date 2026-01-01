@@ -28,6 +28,17 @@
             <VIcon icon="tabler-file-export" class="me-2" />
             Export LCCO Details
           </VBtn>
+
+          <VBtn
+            color="secondary"
+            variant="elevated"
+            class="ms-3"
+            @click="exportInstallationsWithLcco"
+            :loading="isExportingInstallationsWithLcco"
+          >
+            <VIcon icon="tabler-file-export" class="me-2" />
+            Export Installations (with LCCO)
+          </VBtn>
         </div>
       </VCol>
     </VRow>
@@ -585,6 +596,7 @@ const installations = ref({ data: [] });
 const statistics = ref({});
 const statesData = ref([]);
 const isExportingLcco = ref(false);
+const isExportingInstallationsWithLcco = ref(false);
 
 // Status arrays
 const deliveryStatuses = ref([
@@ -983,6 +995,67 @@ const exportLccoDetails = async () => {
     console.error("Failed to export LCCO details", err);
   } finally {
     isExportingLcco.value = false;
+  }
+};
+
+// New: Export installations list but enrich rows with aggregated LCCO columns
+const exportInstallationsWithLcco = async () => {
+  isExportingInstallationsWithLcco.value = true;
+  try {
+    // Fetch LCCO records and full installations in parallel
+    const [lccoRes, instRes] = await Promise.all([
+      lccoService.index({ per_page: 9999 }),
+      installationService.getInstallations({
+        ...filters.value,
+        per_page: 9999,
+      }),
+    ]);
+
+    let lccoData = [];
+    if (lccoRes && lccoRes.success && Array.isArray(lccoRes.data))
+      lccoData = lccoRes.data;
+    else if (
+      lccoRes &&
+      lccoRes.success &&
+      lccoRes.data &&
+      Array.isArray(lccoRes.data.data)
+    )
+      lccoData = lccoRes.data.data;
+
+    let allInst = [];
+    if (instRes && instRes.success && Array.isArray(instRes.data))
+      allInst = instRes.data;
+    else if (
+      instRes &&
+      instRes.success &&
+      instRes.data &&
+      Array.isArray(instRes.data.data)
+    )
+      allInst = instRes.data.data;
+
+    if (!allInst || allInst.length === 0) {
+      console.info("No installations to export");
+      return;
+    }
+
+    // Build map of LCCOs grouped by installation_id
+    const lccoMap = {};
+    lccoData.forEach((r) => {
+      if (!r) return;
+      const key =
+        r.installation_id ?? (r.installation ? r.installation.id : null);
+      if (!key) return;
+      if (!lccoMap[key]) lccoMap[key] = [];
+      lccoMap[key].push(r);
+    });
+
+    // Call new export method
+    frontendExport.exportInstallationsWithLcco(allInst, lccoMap);
+    console.log(`Exported ${allInst.length} installations with LCCO info`);
+  } catch (err) {
+    console.error("Failed to export installations with LCCO", err);
+  } finally {
+    isExportingInstallationsWithLcco.value = false;
   }
 };
 
